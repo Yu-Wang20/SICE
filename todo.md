@@ -348,3 +348,94 @@
 - [ ] Performance check (no layout thrashing)
 - [ ] Accessibility audit (keyboard nav, screen readers)
 - [ ] Build without errors (npm run build)
+
+
+## P3 Text Effects Integration (motion/react + anime.js)
+
+### Phase 1: Rewrite Text Effect Components with motion/react
+- [ ] Create ShinyText.jsx using motion/react (from prompt.docx)
+  * Smooth shine animation with configurable speed
+  * Support for pauseOnHover, direction, yoyo modes
+  * Disabled state fallback to normal text
+  * WebkitTextFillColor handling for accessibility
+
+- [ ] Create TrueFocus.jsx using motion/react (from prompt.docx)
+  * Focus frame animation around words
+  * Manual mode (hover) and auto-toggle mode
+  * Configurable blur amount and animation duration
+  * Border + glow effect with corner markers
+
+- [ ] Create GlitchText.jsx using motion/react (from prompt.docx)
+  * Glitch effect with clip-path animations
+  * Default static, glitch only on hover (enable-on-hover class)
+  * Configurable speed and shadow colors
+  * No continuous glitch (hover-triggered only)
+
+### Phase 2: Create Global Animation Settings
+- [ ] Create motionPrefs.js
+  * Read prefers-reduced-motion from system
+  * Load/save animation intensity from localStorage
+  * Export getAnimationIntensity() and setAnimationIntensity()
+  * Force "off" when prefers-reduced-motion is true
+
+- [ ] Create AnimationSettings.jsx component
+  * Intensity selector (Off/Low/Normal/High)
+  * Show current system preference
+  * Save to localStorage
+  * Add to Header or Settings menu
+
+- [ ] Create TextFX.jsx wrapper
+  * Auto-select effect based on variant + intensity
+  * Support effect override (auto/none/shiny/focus/glitch)
+  * Respect global animation settings
+  * Fallback to plain text when disabled
+
+### Phase 3: Integrate anime.js
+- [ ] Install anime.js: npm i anime
+- [ ] Create useCountUp hook
+  * Animate number from 0 to target
+  * Respect global animation intensity setting
+  * Only run once on mount (no loop)
+  * Disable when Animations = Off
+
+- [ ] Create useAnimationFrame hook
+  * Wrapper for anime.js with intensity control
+  * Disable all animations when Off
+
+### Phase 4: Apply Effects to Key Locations
+- [ ] Update Home page H1 with TextFX variant="hero"
+- [ ] Update EV Calculator "Recommended Action" with TextFX variant="resultTag"
+- [ ] Add CountUp animation to at least one KPI (e.g., EV value, Win%)
+- [ ] Add AnimationSettings entry to Header or Sidebar
+- [ ] Test with Animations Off (no effects)
+- [ ] Test with prefers-reduced-motion (auto-disable)
+
+## P4 Open Doodles Style Illustrations
+
+### Phase 5: Search & Apply Open Doodles Illustrations
+- [ ] Search for Open Doodles style illustrations on:
+  * opendoodles.com (official source)
+  * blush.design (has Open Doodles collection)
+  * Figma community (Open Doodles free packs)
+
+- [ ] Apply illustrations to key sections:
+  * Mathematical Foundations: Person thinking about geometric shapes
+  * Game Theory: Two characters playing cards or board game
+  * AI & Algorithms: Person high-fiving a robot
+  * Hero section: Playful character or scene
+  * Tool pages: Relevant doodle for each tool
+
+- [ ] Style requirements:
+  * Thick black marker lines (signature Open Doodles style)
+  * Hand-drawn aesthetic, squiggly and loose
+  * Minimalist flat colors with accent colors
+  * White background
+  * No text overlays
+  * Consistent with Pablo Stanley aesthetic
+
+- [ ] Integration:
+  * Add illustrations to Atlas/Research sections
+  * Use as hero images for tool cards
+  * Add to section headers
+  * Ensure responsive sizing
+  * Maintain visual hierarchy
