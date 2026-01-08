@@ -39,3 +39,12 @@
 - [ ] Improve visual hierarchy with hero banner and pillar icons
 - [ ] Add breadcrumbs for navigation
 - [ ] Enhance accessibility (semantic HTML, alt text, keyboard nav)
+
+## Interactive Training Features (GTO Wizard/Preflop+ inspired)
+- [x] EV Calculator - calculate expected value for different actions
+- [x] Equity Calculator - hand vs range equity analysis (integrated into EV Calculator)
+- [x] Quiz Mode - decision scenarios with instant feedback
+- [x] Challenge Mode - timed decision puzzles (integrated into Quiz Mode)
+- [x] Strategy Library - preflop ranges and decision matrices
+- [ ] Progress Tracking - save practice records, show improvement curves
+- [ ] Hand History Upload - analyze decisions vs GTO baseline

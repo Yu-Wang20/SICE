@@ -6,7 +6,7 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Calculator, TrendingUp, Target, GitBranch, BookOpen } from "lucide-react";
+import { ArrowLeft, Calculator, TrendingUp, Target, GitBranch, BookOpen, Brain, Grid3X3, Zap } from "lucide-react";
 
 const TOOLS = [
   {
@@ -28,6 +28,15 @@ const TOOLS = [
     theory: 'Doob\'s Martingale (1953)',
   },
   {
+    id: 'ev-calculator',
+    title: 'EV Calculator',
+    description: 'Calculate expected value for fold/call/raise decisions. Compare EV across different actions with detailed analysis.',
+    icon: Zap,
+    path: '/tools/ev-calculator',
+    color: 'yellow',
+    theory: 'Expected Value Theory',
+  },
+  {
     id: 'push-fold',
     title: 'Push/Fold Trainer',
     description: 'Short stack decision engine based on Nash equilibrium ranges. Computed using CFR algorithm.',
@@ -44,6 +53,24 @@ const TOOLS = [
     path: '/tools/position',
     color: 'purple',
     theory: 'Harsanyi + DeepStack/ReBeL',
+  },
+  {
+    id: 'quiz',
+    title: 'Decision Training',
+    description: 'Test your poker decision-making skills with timed scenarios. Get instant feedback and track your progress.',
+    icon: Brain,
+    path: '/tools/quiz',
+    color: 'red',
+    theory: 'GTO + Exploitative Play',
+  },
+  {
+    id: 'strategy-library',
+    title: 'Strategy Library',
+    description: 'GTO preflop ranges by position and strategic decision matrices. Download and study optimal play.',
+    icon: Grid3X3,
+    path: '/tools/strategy-library',
+    color: 'indigo',
+    theory: 'GTO Ranges + CFR+',
   },
 ];
 
@@ -72,43 +99,40 @@ export default function ToolsHub() {
 
       <main className="container py-12">
         {/* Tools Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {TOOLS.map((tool) => {
             const Icon = tool.icon;
-            const colorClasses = {
-              blue: 'border-blue-500 hover:bg-blue-50',
-              green: 'border-green-500 hover:bg-green-50',
-              orange: 'border-orange-500 hover:bg-orange-50',
-              purple: 'border-purple-500 hover:bg-purple-50',
-            }[tool.color];
-            
-            const iconColorClasses = {
-              blue: 'text-blue-500',
-              green: 'text-green-500',
-              orange: 'text-orange-500',
-              purple: 'text-purple-500',
-            }[tool.color];
+            const colorMap: Record<string, { border: string; hover: string; icon: string }> = {
+              blue: { border: 'border-blue-500', hover: 'hover:bg-blue-50', icon: 'text-blue-500' },
+              green: { border: 'border-green-500', hover: 'hover:bg-green-50', icon: 'text-green-500' },
+              yellow: { border: 'border-yellow-500', hover: 'hover:bg-yellow-50', icon: 'text-yellow-500' },
+              orange: { border: 'border-orange-500', hover: 'hover:bg-orange-50', icon: 'text-orange-500' },
+              purple: { border: 'border-purple-500', hover: 'hover:bg-purple-50', icon: 'text-purple-500' },
+              red: { border: 'border-red-500', hover: 'hover:bg-red-50', icon: 'text-red-500' },
+              indigo: { border: 'border-indigo-500', hover: 'hover:bg-indigo-50', icon: 'text-indigo-500' },
+            };
+            const colors = colorMap[tool.color] || colorMap.blue;
 
             return (
               <Card 
                 key={tool.id}
-                className={`border-2 cursor-pointer transition-all ${colorClasses}`}
+                className={`border-2 cursor-pointer transition-all ${colors.border} ${colors.hover}`}
                 onClick={() => navigate(tool.path)}
               >
-                <CardHeader>
+                <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
-                    <Icon className={`w-10 h-10 ${iconColorClasses}`} />
+                    <Icon className={`w-8 h-8 ${colors.icon}`} />
                     <span className="text-xs font-mono text-gray-500 bg-gray-100 px-2 py-1 rounded">
                       {tool.theory}
                     </span>
                   </div>
-                  <CardTitle className="text-2xl mt-4">{tool.title}</CardTitle>
-                  <CardDescription className="text-base">
+                  <CardTitle className="text-xl mt-3">{tool.title}</CardTitle>
+                  <CardDescription className="text-sm">
                     {tool.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline">
+                  <Button className="w-full" variant="outline" size="sm">
                     Open Tool →
                   </Button>
                 </CardContent>
@@ -156,7 +180,7 @@ export default function ToolsHub() {
           <p className="text-gray-300">
             These tools demonstrate Sutton's insight: rather than encoding hand-crafted poker rules, 
             we use data-driven analysis and game-theoretic algorithms that scale with compute. 
-            The database contains 100,000+ hand outcomes, enabling empirical probability calculations 
+            The database contains 1,000,000+ hand outcomes, enabling empirical probability calculations 
             that outperform human intuition.
           </p>
         </div>

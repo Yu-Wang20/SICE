@@ -18,6 +18,9 @@ import HandStrength from "./pages/tools/HandStrength";
 import PotOdds from "./pages/tools/PotOdds";
 import PushFold from "./pages/tools/PushFold";
 import PositionSimulator from "./pages/tools/PositionSimulator";
+import EVCalculator from "./pages/tools/EVCalculator";
+import QuizMode from "./pages/tools/QuizMode";
+import StrategyLibrary from "./pages/tools/StrategyLibrary";
 import ResearchMap from "./pages/ResearchMap";
 
 function Router() {
@@ -39,6 +42,9 @@ function Router() {
       <Route path={"/tools/pot-odds"} component={PotOdds} />
       <Route path={"/tools/push-fold"} component={PushFold} />
       <Route path={"/tools/position"} component={PositionSimulator} />
+      <Route path={"/tools/ev-calculator"} component={EVCalculator} />
+      <Route path={"/tools/quiz"} component={QuizMode} />
+      <Route path={"/tools/strategy-library"} component={StrategyLibrary} />
       <Route path={"/research-map"} component={ResearchMap} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
