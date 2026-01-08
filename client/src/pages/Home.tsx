@@ -263,45 +263,93 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-6 rounded-xl border border-gray-200 hover:border-emerald-300 transition-colors">
-              <h3 className="font-semibold text-gray-900 mb-2">Mathematical Foundations</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Probability theory, martingale convergence, and stochastic calculus
-              </p>
-              <Button variant="ghost" className="text-emerald-600 p-0 h-auto font-medium text-sm">
-                Read Article →
-              </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Mathematical Foundations */}
+            <div className="group p-8 rounded-2xl border border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all bg-white">
+              <div className="flex items-start gap-6">
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">Mathematical Foundations</h3>
+                  <p className="text-gray-600 mb-4 leading-relaxed">
+                    Probability theory, martingale convergence, and stochastic calculus—the mathematical bedrock of optimal decision-making.
+                  </p>
+                  <Button variant="ghost" className="text-emerald-600 p-0 h-auto font-medium group-hover:translate-x-1 transition-transform">
+                    Read Article →
+                  </Button>
+                </div>
+                <div className="hidden md:block w-32 h-32 flex-shrink-0">
+                  <img 
+                    src="/illustrations/thinking.svg" 
+                    alt="Thinking illustration" 
+                    className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="p-6 rounded-xl border border-gray-200 hover:border-emerald-300 transition-colors">
-              <h3 className="font-semibold text-gray-900 mb-2">Game Theory & GTO</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Nash equilibrium, Harsanyi transformation, and exploitative strategies
-              </p>
-              <Button variant="ghost" className="text-emerald-600 p-0 h-auto font-medium text-sm">
-                Read Article →
-              </Button>
+            {/* Game Theory & GTO */}
+            <div className="group p-8 rounded-2xl border border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all bg-white">
+              <div className="flex items-start gap-6">
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">Game Theory & GTO</h3>
+                  <p className="text-gray-600 mb-4 leading-relaxed">
+                    Nash equilibrium, Harsanyi transformation, and exploitative strategies—the science of strategic interaction.
+                  </p>
+                  <Button variant="ghost" className="text-emerald-600 p-0 h-auto font-medium group-hover:translate-x-1 transition-transform">
+                    Read Article →
+                  </Button>
+                </div>
+                <div className="hidden md:block w-32 h-32 flex-shrink-0">
+                  <img 
+                    src="/illustrations/dancing.svg" 
+                    alt="Interaction illustration" 
+                    className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="p-6 rounded-xl border border-gray-200 hover:border-emerald-300 transition-colors">
-              <h3 className="font-semibold text-gray-900 mb-2">AI & Algorithms</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                AlphaZero, ReBeL, Pluribus, and the future of strategic AI
-              </p>
-              <Button variant="ghost" className="text-emerald-600 p-0 h-auto font-medium text-sm">
-                Read Article →
-              </Button>
+            {/* AI & Algorithms */}
+            <div className="group p-8 rounded-2xl border border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all bg-white">
+              <div className="flex items-start gap-6">
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">AI & Algorithms</h3>
+                  <p className="text-gray-600 mb-4 leading-relaxed">
+                    AlphaZero, ReBeL, Pluribus, and the future of strategic AI—where human intuition meets machine precision.
+                  </p>
+                  <Button variant="ghost" className="text-emerald-600 p-0 h-auto font-medium group-hover:translate-x-1 transition-transform">
+                    Read Article →
+                  </Button>
+                </div>
+                <div className="hidden md:block w-32 h-32 flex-shrink-0">
+                  <img 
+                    src="/illustrations/selfie.svg" 
+                    alt="Technology illustration" 
+                    className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="p-6 rounded-xl border border-gray-200 hover:border-emerald-300 transition-colors">
-              <h3 className="font-semibold text-gray-900 mb-2">Decision Framework</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Map your environment to the optimal algorithm for maximum edge
-              </p>
-              <Button variant="ghost" className="text-emerald-600 p-0 h-auto font-medium text-sm">
-                Read Article →
-              </Button>
+            {/* Decision Framework */}
+            <div className="group p-8 rounded-2xl border border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all bg-white">
+              <div className="flex items-start gap-6">
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">Decision Framework</h3>
+                  <p className="text-gray-600 mb-4 leading-relaxed">
+                    Map your environment to the optimal algorithm for maximum edge—a practical guide to strategic thinking.
+                  </p>
+                  <Button variant="ghost" className="text-emerald-600 p-0 h-auto font-medium group-hover:translate-x-1 transition-transform">
+                    Read Article →
+                  </Button>
+                </div>
+                <div className="hidden md:block w-32 h-32 flex-shrink-0">
+                  <img 
+                    src="/illustrations/reading.svg" 
+                    alt="Reading illustration" 
+                    className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -439,3 +439,25 @@
   * Add to section headers
   * Ensure responsive sizing
   * Maintain visual hierarchy
+
+
+## P4 Open Doodles Illustration Integration
+
+### Style Requirements
+- Pablo Stanley / Open Doodles aesthetic
+- Thick black marker lines, hand-drawn vector style
+- Minimalist black & white with accent colors (pink/coral)
+- Large whitespace, playful and loose
+
+### Illustrations Needed
+- [ ] Mathematical Foundations: Character thinking/confused at geometric shapes
+- [ ] Game Theory: Two characters interacting/playing cards or chess
+- [ ] AI & Algorithms: Human high-fiving robot/computer
+
+### Implementation
+- [ ] Search opendoodles.com and blush.design for suitable illustrations
+- [ ] Download and save to /client/public/illustrations/
+- [ ] Apply to Research section cards on Home page
+- [ ] Apply to Atlas pillar pages
+- [ ] Ensure large whitespace and visual balance
+- [ ] Test responsive layout with illustrations
