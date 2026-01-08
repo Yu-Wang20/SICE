@@ -1,6 +1,6 @@
-import { eq, like, sql, and } from "drizzle-orm";
+import { eq, desc, and, like } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, handOutcomes, handStrengthStats, positionRanges, researchConcepts } from "../drizzle/schema";
+import { InsertUser, users, handOutcomes, handStrengthStats, positionRanges, researchConcepts, quizAttempts, userProgress, InsertQuizAttempt } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -115,7 +115,7 @@ export async function queryHandOutcomes(holeCards: string, limit = 100) {
   
   return db.select()
     .from(handOutcomes)
-    .where(like(handOutcomes.holeCards, `%${holeCards}%`))
+    .where(like(handOutcomes.holeCards, `%${holeCards}%` as any))
     .limit(limit);
 }
 
@@ -314,4 +314,132 @@ export async function getPushFoldRecommendation(
     pushFoldEquity: Math.round(equity * 100),
     heuristic: `Based on ${position} vs ${opponentType} opponent with ${handCategory} hand at ${stackBB}BB`,
   };
+}
+
+
+// ============================================
+// QUIZ & TRAINING QUERIES
+// ============================================
+
+export async function saveQuizAttempt(attempt: InsertQuizAttempt) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  try {
+    await db.insert(quizAttempts).values(attempt);
+    
+    // Update user progress
+    const existing = await db.select().from(userProgress).where(eq(userProgress.userId, attempt.userId)).limit(1);
+    
+    if (existing.length > 0) {
+      const prog = existing[0];
+      const newTotal = (prog.totalAttempts || 0) + 1;
+      const newCorrect = (prog.correctAnswers || 0) + (attempt.isCorrect ? 1 : 0);
+      const newStreak = attempt.isCorrect ? (prog.currentStreak || 0) + 1 : 0;
+      const newLongest = Math.max(prog.longestStreak || 0, newStreak);
+      
+      await db.update(userProgress)
+        .set({
+          totalAttempts: newTotal,
+          correctAnswers: newCorrect,
+          currentStreak: newStreak,
+          longestStreak: newLongest,
+          lastActivityAt: new Date(),
+        })
+        .where(eq(userProgress.userId, attempt.userId));
+    } else {
+      await db.insert(userProgress).values({
+        userId: attempt.userId,
+        totalAttempts: 1,
+        correctAnswers: attempt.isCorrect ? 1 : 0,
+        currentStreak: attempt.isCorrect ? 1 : 0,
+        longestStreak: attempt.isCorrect ? 1 : 0,
+      });
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("[Database] Failed to save quiz attempt:", error);
+    return null;
+  }
+}
+
+export async function getUserProgress(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  try {
+    const result = await db.select().from(userProgress).where(eq(userProgress.userId, userId)).limit(1);
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    console.error("[Database] Failed to get user progress:", error);
+    return null;
+  }
+}
+
+export async function getWrongAnswers(userId: number, limit = 10) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  try {
+    const result = await db
+      .select()
+      .from(quizAttempts)
+      .where(and(eq(quizAttempts.userId, userId), eq(quizAttempts.isCorrect, false)))
+      .orderBy(desc(quizAttempts.createdAt))
+      .limit(limit);
+    
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get wrong answers:", error);
+    return [];
+  }
+}
+
+export async function getQuizHistory(userId: number, limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  try {
+    const result = await db
+      .select()
+      .from(quizAttempts)
+      .where(eq(quizAttempts.userId, userId))
+      .orderBy(desc(quizAttempts.createdAt))
+      .limit(limit);
+    
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get quiz history:", error);
+    return [];
+  }
+}
+
+export async function getQuizStatsByCategory(userId: number) {
+  const db = await getDb();
+  if (!db) return {};
+  
+  try {
+    const attempts = await db
+      .select()
+      .from(quizAttempts)
+      .where(eq(quizAttempts.userId, userId));
+    
+    const stats: Record<string, { total: number; correct: number; accuracy: number }> = {};
+    
+    attempts.forEach(attempt => {
+      const cat = attempt.category || 'unknown';
+      if (!stats[cat]) {
+        stats[cat] = { total: 0, correct: 0, accuracy: 0 };
+      }
+      stats[cat].total++;
+      if (attempt.isCorrect) stats[cat].correct++;
+      stats[cat].accuracy = Math.round((stats[cat].correct / stats[cat].total) * 100);
+    });
+    
+    return stats;
+  } catch (error) {
+    console.error("[Database] Failed to get category stats:", error);
+    return {};
+  }
 }

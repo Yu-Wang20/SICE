@@ -98,3 +98,100 @@ export const researchConcepts = mysqlTable("research_concepts", {
 
 export type ResearchConcept = typeof researchConcepts.$inferSelect;
 export type InsertResearchConcept = typeof researchConcepts.$inferInsert;
+
+// ============================================
+// QUIZ & TRAINING TABLES
+// ============================================
+
+export const quizAttempts = mysqlTable("quiz_attempts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  questionId: varchar("question_id", { length: 50 }).notNull(),
+  userAnswer: varchar("user_answer", { length: 50 }).notNull(),
+  correctAnswer: varchar("correct_answer", { length: 50 }).notNull(),
+  isCorrect: boolean("is_correct").notNull(),
+  timeSpentSeconds: int("time_spent_seconds"),
+  difficulty: varchar("difficulty", { length: 20 }),
+  category: varchar("category", { length: 50 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type QuizAttempt = typeof quizAttempts.$inferSelect;
+export type InsertQuizAttempt = typeof quizAttempts.$inferInsert;
+
+export const userProgress = mysqlTable("user_progress", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  totalAttempts: int("total_attempts").default(0),
+  correctAnswers: int("correct_answers").default(0),
+  currentStreak: int("current_streak").default(0),
+  longestStreak: int("longest_streak").default(0),
+  categoryStats: json("category_stats"),
+  lastActivityAt: timestamp("last_activity_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UserProgress = typeof userProgress.$inferSelect;
+export type InsertUserProgress = typeof userProgress.$inferInsert;
+
+// ============================================
+// HAND HISTORY & ANALYSIS TABLES
+// ============================================
+
+export const handHistories = mysqlTable("hand_histories", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id"),
+  fileName: varchar("file_name", { length: 255 }),
+  rawContent: text("raw_content"),
+  analysisResult: json("analysis_result"),
+  uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
+});
+
+export type HandHistory = typeof handHistories.$inferSelect;
+export type InsertHandHistory = typeof handHistories.$inferInsert;
+
+export const deviationAnalysis = mysqlTable("deviation_analysis", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id"),
+  handHistoryId: int("hand_history_id"),
+  decisionPoint: int("decision_point"),
+  playerAction: varchar("player_action", { length: 50 }),
+  gtoRecommendation: varchar("gto_recommendation", { length: 50 }),
+  deviationScore: float("deviation_score"),
+  explanation: text("explanation"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type DeviationAnalysis = typeof deviationAnalysis.$inferSelect;
+export type InsertDeviationAnalysis = typeof deviationAnalysis.$inferInsert;
+
+// ============================================
+// STRATEGY & COMPARISON TABLES
+// ============================================
+
+export const strategySnapshots = mysqlTable("strategy_snapshots", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  strategyType: varchar("strategy_type", { length: 50 }).notNull(),
+  rangeData: json("range_data"),
+  metadata: json("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type StrategySnapshot = typeof strategySnapshots.$inferSelect;
+export type InsertStrategySnapshot = typeof strategySnapshots.$inferInsert;
+
+export const strategyComparisons = mysqlTable("strategy_comparisons", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id"),
+  strategy1Id: int("strategy1_id"),
+  strategy2Id: int("strategy2_id"),
+  comparisonData: json("comparison_data"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type StrategyComparison = typeof strategyComparisons.$inferSelect;
+export type InsertStrategyComparison = typeof strategyComparisons.$inferInsert;

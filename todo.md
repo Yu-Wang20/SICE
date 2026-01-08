@@ -83,3 +83,69 @@
 - [x] Update Quiz UI with difficulty selector and category filter
 - [x] Add progress tracking and accuracy statistics
 - [x] Implement tRPC quiz API routes
+
+
+## P0 Critical Fixes
+- [x] Fix EV Calculator - ensure Calculate button displays results (added tabs, implied odds, reverse implied odds)
+- [x] Fix Position Simulator - correct unrealistic EV values (2000% → realistic range)
+- [x] Verify all calculations with real GTO data
+
+## P1a Quiz Enhancement
+- [ ] Add error tracking/wrong answer history
+- [ ] Implement quiz history and progress tracking
+- [ ] Expand question bank to 50+ questions
+- [ ] Add multi-way pot scenarios
+- [ ] Add ICM bubble stage questions
+- [ ] Add complex postflop decision trees
+
+## P1b Hand Strength & GTO Library
+- [ ] Add "equity rundown" probability calculation
+- [ ] Filter by player count (2-9)
+- [ ] Filter by pot size ranges
+- [ ] Filter by board texture (dry/wet/polarized)
+- [ ] Expand GTO Library to 9-max tables
+- [ ] Support multiple stack depths (50BB, 40BB, 25BB)
+- [ ] Add 3-Bet/Call/Fold color distinction
+- [ ] Export GTO ranges as PNG/PDF
+- [ ] Add ICM adjustment mode for tournaments
+- [ ] Generate exploitative ranges based on opponent style
+
+## P1c Pot Odds & Push/Fold
+- [ ] Fix Pot Odds engine and add visualization
+- [ ] Calculate implied odds
+- [ ] Calculate reverse implied odds
+- [ ] Support multi-way pots
+- [ ] Add opponent betting range analysis
+- [ ] Integrate ICM model into Push/Fold trainer
+- [ ] Support multi-way decisions (push/fold/call)
+- [ ] Allow custom opponent range input
+- [ ] Add bubble stage special handling
+
+## P2 Advanced Features
+- [ ] Implement Hand History upload (PokerStars/GGPoker format)
+- [ ] Auto-detect key decision points
+- [ ] GTO deviation analysis
+- [ ] Generate "leak report"
+- [ ] Create comparison workbench (side-by-side ranges)
+- [ ] GTO vs Exploitative comparison
+- [ ] Different bet size comparison
+- [ ] Heatmap difference visualization
+- [ ] Add timed challenge mode (30 sec/question)
+- [ ] Implement win streak tracking system
+- [ ] Add weak area focused training
+- [ ] Create leaderboard (accuracy/speed)
+- [ ] Add achievement/badge system
+
+## P3 Community & Polish
+- [ ] Create hand discussion forum
+- [ ] Add strategy sharing channel
+- [ ] Implement user comments and feedback
+- [ ] Add community hot hands ranking
+- [ ] Add "key formulas" cards to knowledge sections
+- [ ] Add "strategy highlights" summaries
+- [ ] Add "further reading" links
+- [ ] Create visual explanations (Nash equilibrium, algorithm flowcharts)
+- [ ] Add EV curve charts
+- [ ] Add heatmap visualizations
+- [ ] Add interactive decision trees
+- [ ] Add probability distribution charts

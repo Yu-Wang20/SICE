@@ -13,6 +13,11 @@ import {
   getResearchConceptByFeature,
   calculatePotOdds,
   getPushFoldRecommendation,
+  saveQuizAttempt,
+  getUserProgress,
+  getWrongAnswers,
+  getQuizHistory,
+  getQuizStatsByCategory,
 } from "./db";
 import {
   QUIZ_QUESTIONS,
@@ -219,6 +224,44 @@ export const appRouter = router({
           QUIZ_QUESTIONS.reduce((sum, q) => sum + q.readTime, 0) / QUIZ_QUESTIONS.length
         ),
       };
+    }),
+
+    // Save quiz attempt and update progress
+    saveAttempt: publicProcedure
+      .input(z.object({
+        questionId: z.string(),
+        userAnswer: z.string(),
+        correctAnswer: z.string(),
+        isCorrect: z.boolean(),
+        timeSpentSeconds: z.number().optional(),
+        difficulty: z.string().optional(),
+        category: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) return { success: false };
+        const result = await saveQuizAttempt({
+          userId: ctx.user.id,
+          questionId: input.questionId,
+          userAnswer: input.userAnswer,
+          correctAnswer: input.correctAnswer,
+          isCorrect: input.isCorrect,
+          timeSpentSeconds: input.timeSpentSeconds,
+          difficulty: input.difficulty,
+          category: input.category,
+        });
+        return { success: !!result };
+      }),
+
+    // Get user progress
+    getProgress: publicProcedure.query(async ({ ctx }) => {
+      if (!ctx.user) return null;
+      return getUserProgress(ctx.user.id);
+    }),
+
+    // Get category statistics
+    getCategoryStats: publicProcedure.query(async ({ ctx }) => {
+      if (!ctx.user) return {};
+      return getQuizStatsByCategory(ctx.user.id);
     }),
   }),
 

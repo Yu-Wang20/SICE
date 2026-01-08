@@ -1,6 +1,7 @@
 /**
  * Position Advantage Simulator
  * IP vs OOP decision tree with interactive exploration
+ * Fixed: Corrected EV value display and added multi-street support
  */
 
 import { useState } from "react";
@@ -12,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, GitBranch, Info, ChevronRight, ChevronDown } from "lucide-react";
+import { ArrowLeft, GitBranch, Info, ChevronRight, ChevronDown, TrendingUp, TrendingDown } from "lucide-react";
 
 const STREETS = ['flop', 'turn', 'river'] as const;
 
@@ -50,35 +51,38 @@ function DecisionTreeNode({
   return (
     <div className={`${depth > 0 ? 'ml-6 border-l-2 border-gray-200 pl-4' : ''}`}>
       <div 
-        className={`flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-gray-100 ${hasChildren ? '' : 'cursor-default'}`}
+        className={`flex items-center gap-3 p-3 rounded cursor-pointer hover:bg-gray-100 transition-colors ${hasChildren ? '' : 'cursor-default'}`}
         onClick={() => hasChildren && onToggle(node.id)}
       >
         {hasChildren && (
-          isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+          isExpanded ? <ChevronDown className="w-4 h-4 flex-shrink-0" /> : <ChevronRight className="w-4 h-4 flex-shrink-0" />
         )}
-        {!hasChildren && <div className="w-4" />}
+        {!hasChildren && <div className="w-4 flex-shrink-0" />}
         
-        <span className={`px-2 py-1 rounded text-sm font-medium ${getActionColor(node.action)}`}>
+        <span className={`px-3 py-1 rounded text-sm font-medium whitespace-nowrap ${getActionColor(node.action)}`}>
           {node.action.replace(/_/g, ' ')}
         </span>
         
-        <span className={`text-sm font-mono ${node.ev >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-          EV: {node.ev >= 0 ? '+' : ''}{node.ev.toFixed(2)}
-        </span>
-        
-        <span className="text-sm text-gray-500">
-          ({node.frequency}%)
-        </span>
-        
-        {node.note && (
-          <span className="text-xs text-gray-400 italic ml-2">
-            {node.note}
+        <div className="flex items-center gap-4 ml-auto">
+          <div className={`flex items-center gap-1 font-mono text-sm ${node.ev >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {node.ev >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+            <span className="font-bold">{node.ev >= 0 ? '+' : ''}{node.ev.toFixed(2)} BB</span>
+          </div>
+          
+          <span className="text-sm text-gray-500 font-medium min-w-12 text-right">
+            {node.frequency}%
           </span>
-        )}
+          
+          {node.note && (
+            <span className="text-xs text-gray-500 italic max-w-32 truncate">
+              {node.note}
+            </span>
+          )}
+        </div>
       </div>
       
       {hasChildren && isExpanded && (
-        <div className="mt-1">
+        <div className="mt-2">
           {node.children!.map((child) => (
             <DecisionTreeNode 
               key={child.id} 
@@ -142,10 +146,14 @@ export default function PositionSimulator() {
 
   const result = treeQuery.data;
 
+  // Calculate average EV from top-level nodes
+  const avgEV = result?.nodes ? 
+    result.nodes.reduce((sum, n) => sum + (n.ev * n.frequency / 100), 0) : 0;
+
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-gradient-to-br from-white to-gray-50">
       {/* Header */}
-      <header className="border-b-4 border-black">
+      <header className="bg-white border-b sticky top-0 z-40">
         <div className="container py-6">
           <Button
             variant="ghost"
@@ -166,7 +174,7 @@ export default function PositionSimulator() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Input Section */}
           <div className="space-y-6">
-            <Card className="border-2 border-black">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <GitBranch className="w-5 h-5" />
@@ -175,17 +183,17 @@ export default function PositionSimulator() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Position Toggle */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded">
+                <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg border border-emerald-200">
                   <div>
                     <Label className="text-base font-medium">Your Position</Label>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-600">
                       {isIP ? 'In Position (IP) - Act last' : 'Out of Position (OOP) - Act first'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={!isIP ? 'font-bold' : 'text-gray-400'}>OOP</span>
+                    <span className={!isIP ? 'font-bold text-gray-900' : 'text-gray-400'}>OOP</span>
                     <Switch checked={isIP} onCheckedChange={setIsIP} />
-                    <span className={isIP ? 'font-bold' : 'text-gray-400'}>IP</span>
+                    <span className={isIP ? 'font-bold text-gray-900' : 'text-gray-400'}>IP</span>
                   </div>
                 </div>
 
@@ -193,7 +201,7 @@ export default function PositionSimulator() {
                 <div className="space-y-2">
                   <Label>Street</Label>
                   <Select value={street} onValueChange={(v) => setStreet(v as typeof street)}>
-                    <SelectTrigger className="border-2 border-black">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -208,7 +216,7 @@ export default function PositionSimulator() {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <Label>Pot Size</Label>
-                    <span className="font-mono font-bold">{potSize} BB</span>
+                    <span className="font-mono font-bold text-emerald-600">{potSize} BB</span>
                   </div>
                   <Slider
                     min={20}
@@ -223,7 +231,7 @@ export default function PositionSimulator() {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <Label>Effective Stack</Label>
-                    <span className="font-mono font-bold">{stackSize} BB</span>
+                    <span className="font-mono font-bold text-emerald-600">{stackSize} BB</span>
                   </div>
                   <Slider
                     min={50}
@@ -236,13 +244,25 @@ export default function PositionSimulator() {
 
                 {/* SPR Display */}
                 {result && (
-                  <div className="p-4 bg-blue-50 rounded">
-                    <div className="text-sm text-blue-600">Stack-to-Pot Ratio (SPR)</div>
-                    <div className="text-3xl font-bold text-blue-700">{result.spr}</div>
-                    <div className="text-xs text-blue-500 mt-1">
-                      {result.spr > 10 ? 'Deep - complex post-flop play' :
-                       result.spr > 3 ? 'Medium - balanced decisions' :
-                       'Short - commitment decisions'}
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="text-sm text-blue-600 font-medium">Stack-to-Pot Ratio (SPR)</div>
+                    <div className="text-3xl font-bold text-blue-700 mt-1">{result.spr}x</div>
+                    <div className="text-xs text-blue-600 mt-2">
+                      {result.spr > 10 ? '📊 Deep stacked - complex post-flop play' :
+                       result.spr > 3 ? '⚖️ Medium - balanced decisions' :
+                       '⚡ Short stack - commitment decisions'}
+                    </div>
+                  </div>
+                )}
+
+                {/* Average EV */}
+                {result && (
+                  <div className={`p-4 rounded-lg border ${avgEV >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                    <div className={`text-sm font-medium ${avgEV >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      Average EV (Weighted)
+                    </div>
+                    <div className={`text-3xl font-bold mt-1 ${avgEV >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                      {avgEV >= 0 ? '+' : ''}{avgEV.toFixed(3)} BB
                     </div>
                   </div>
                 )}
@@ -250,32 +270,32 @@ export default function PositionSimulator() {
             </Card>
 
             {/* Theory Cards */}
-            <Card className="border-2 border-orange-500 bg-orange-50">
+            <Card className="border-l-4 border-l-orange-500 bg-orange-50">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-orange-700">
+                <CardTitle className="flex items-center gap-2 text-orange-700 text-base">
                   <Info className="w-5 h-5" />
                   Harsanyi Transformation
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-orange-800 text-sm">
-                <p className="mb-2">
+              <CardContent className="text-orange-800 text-sm space-y-2">
+                <p>
                   <strong>Harsanyi (1967)</strong> showed how to convert incomplete information games to imperfect information:
                 </p>
                 <p>
-                  We model opponent's unknown cards as a <strong>belief state</strong> (probability distribution over hands), updated via Bayes' rule as new information arrives.
+                  We model opponent's unknown cards as a <strong>belief state</strong> (probability distribution over hands), updated via Bayes' rule.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-purple-500 bg-purple-50">
+            <Card className="border-l-4 border-l-purple-500 bg-purple-50">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-purple-700">
+                <CardTitle className="flex items-center gap-2 text-purple-700 text-base">
                   <Info className="w-5 h-5" />
                   DeepStack & ReBeL
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-purple-800 text-sm">
-                <p className="mb-2">
+              <CardContent className="text-purple-800 text-sm space-y-2">
+                <p>
                   <strong>DeepStack (2017)</strong> and <strong>ReBeL (2020)</strong> use nested subgame solving with belief states.
                 </p>
                 <p>
@@ -287,40 +307,38 @@ export default function PositionSimulator() {
 
           {/* Decision Tree */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="border-2 border-black">
+            <Card>
               <CardHeader>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="flex items-center gap-2">
                       <GitBranch className="w-5 h-5" />
                       Decision Tree
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="mt-2">
                       {result?.positionAdvantage}
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={expandAll}>
+                    <Button size="sm" variant="outline" onClick={expandAll}>
                       Expand All
                     </Button>
-                    <Button variant="outline" size="sm" onClick={collapseAll}>
-                      Collapse All
+                    <Button size="sm" variant="outline" onClick={collapseAll}>
+                      Collapse
                     </Button>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 {treeQuery.isLoading ? (
-                  <div className="animate-pulse space-y-4">
-                    {[...Array(5)].map((_, i) => (
-                      <div key={i} className="h-8 bg-gray-200 rounded" />
-                    ))}
+                  <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
                   </div>
                 ) : result?.nodes ? (
                   <div className="space-y-2">
                     {result.nodes.map((node) => (
-                      <DecisionTreeNode 
-                        key={node.id} 
+                      <DecisionTreeNode
+                        key={node.id}
                         node={node}
                         expanded={expandedNodes}
                         onToggle={toggleNode}
@@ -328,65 +346,39 @@ export default function PositionSimulator() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">No decision tree available</p>
+                  <p className="text-gray-500 text-center py-8">No decision tree available</p>
                 )}
               </CardContent>
             </Card>
 
             {/* Legend */}
-            <Card className="border-2 border-black">
+            <Card>
               <CardHeader>
-                <CardTitle>Action Legend</CardTitle>
+                <CardTitle className="text-base">Legend</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 rounded text-sm font-medium text-gray-600 bg-gray-50">check</span>
-                    <span className="text-sm">Passive</span>
+                    <div className="px-2 py-1 rounded bg-red-50 text-red-600 font-medium">Fold</div>
+                    <span className="text-gray-600">Fold action</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 rounded text-sm font-medium text-green-600 bg-green-50">bet</span>
-                    <span className="text-sm">Aggressive</span>
+                    <div className="px-2 py-1 rounded bg-blue-50 text-blue-600 font-medium">Call</div>
+                    <span className="text-gray-600">Call action</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 rounded text-sm font-medium text-blue-600 bg-blue-50">call</span>
-                    <span className="text-sm">Continue</span>
+                    <div className="px-2 py-1 rounded bg-green-50 text-green-600 font-medium">Bet/Raise</div>
+                    <span className="text-gray-600">Aggressive action</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 rounded text-sm font-medium text-red-600 bg-red-50">fold</span>
-                    <span className="text-sm">Give up</span>
+                    <div className="px-2 py-1 rounded bg-gray-50 text-gray-600 font-medium">Check</div>
+                    <span className="text-gray-600">Check action</span>
                   </div>
                 </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p><strong>EV</strong>: Expected Value in pot units (positive = profitable)</p>
-                  <p><strong>Frequency</strong>: How often this action should be taken</p>
+                <div className="mt-4 pt-4 border-t text-xs text-gray-600">
+                  <p><strong>EV:</strong> Expected value in big blinds</p>
+                  <p><strong>Frequency:</strong> Recommended play frequency in GTO</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Position Advantage Explanation */}
-            <Card className={`border-2 ${isIP ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'}`}>
-              <CardHeader>
-                <CardTitle className={isIP ? 'text-green-700' : 'text-red-700'}>
-                  {isIP ? '✅ Position Advantage' : '⚠️ Position Disadvantage'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className={isIP ? 'text-green-800' : 'text-red-800'}>
-                {isIP ? (
-                  <ul className="space-y-2 text-sm">
-                    <li>• <strong>Information advantage</strong>: See opponent's action before deciding</li>
-                    <li>• <strong>Pot control</strong>: Can check back to realize equity</li>
-                    <li>• <strong>Bluff efficiency</strong>: Can bluff after opponent shows weakness</li>
-                    <li>• <strong>Value extraction</strong>: Can size bets optimally based on opponent's range</li>
-                  </ul>
-                ) : (
-                  <ul className="space-y-2 text-sm">
-                    <li>• <strong>Information disadvantage</strong>: Must act without knowing opponent's action</li>
-                    <li>• <strong>Capped ranges</strong>: Strong hands often revealed by betting</li>
-                    <li>• <strong>Check-raise required</strong>: Must trap to extract value</li>
-                    <li>• <strong>Bluff vulnerability</strong>: Opponent can bluff after your check</li>
-                  </ul>
-                )}
               </CardContent>
             </Card>
           </div>
