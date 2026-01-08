@@ -272,3 +272,79 @@
 - [ ] Cap all frequency percentages at 100%
 - [ ] Validate that pot odds calculations are correct
 - [ ] Ensure implied odds and reverse implied odds are realistic
+
+
+## P2 Text Effects & Animation System Integration
+
+### Phase 1: Create Text Effect Components
+- [ ] Create ShinyText component with CSS module (local scope)
+  * Smooth shine animation with configurable speed
+  * Support for disabled state
+  * Accessibility: proper contrast on light/dark backgrounds
+  * SSR safe (no window/document direct access)
+
+- [ ] Create TrueFocus component with CSS module
+  * Blur/focus effect on text
+  * Manual mode toggle (hover vs auto)
+  * Configurable blur amount and animation interval
+  * Fallback to children/text when sentence empty
+
+- [ ] Create GlitchText component with CSS module
+  * Glitch animation effect
+  * enableOnHover support (default static, glitch only on hover)
+  * No continuous glitch (one-time or hover-triggered)
+  * Accessibility: readable in all states
+
+### Phase 2: Create TextFX Unified Component
+- [ ] Create TextFX wrapper component with strategy system
+  * Props: text/children, variant, effect, intensity, className, as
+  * Auto-selection logic based on variant + intensity
+  * Support for effect override (auto/none/shiny/focus/glitch)
+  * Render as configurable element (span/h1/div/etc)
+
+- [ ] Implement animation strategy rules
+  * hero: ShinyText (slow, soft shine)
+  * kpi: ShinyText or anime.js countUp
+  * sectionTitle: TrueFocus (hover or auto)
+  * resultTag: ShinyText or GlitchText (hover only)
+  * warning: GlitchText (hover only) or plain text
+  * button: Light Shiny on hover
+  * body: Never use effects (readability)
+
+- [ ] Add prefers-reduced-motion detection
+  * Auto-disable effects when system prefers reduced motion
+  * Force effect="none" or minimum intensity
+
+### Phase 3: Create Animation Settings System
+- [ ] Create AnimationSettings context/hook
+  * Global intensity state: Off / Low / Normal / High
+  * localStorage persistence (survives page refresh)
+  * prefers-reduced-motion detection
+
+- [ ] Create Settings Panel component
+  * Add to Header or Settings menu
+  * Intensity selector (Off/Low/Normal/High)
+  * Show current system preference
+  * Save to localStorage
+
+- [ ] Integrate anime.js
+  * Install anime.js package
+  * Create anime utility hooks for CountUp
+  * Use only for high-value animations (KPI countUp, card hover, result entry)
+  * Respect global intensity setting
+  * Prevent continuous loops (one-time or hover-triggered)
+
+### Phase 4: Apply TextFX to Key Locations
+- [ ] Update Home page H1 with TextFX variant="hero"
+- [ ] Update EV Calculator "Recommended Action" with TextFX variant="resultTag"
+- [ ] Add KPI countUp animation (anime.js) to at least one number
+- [ ] Add Animations settings to Header or Settings menu
+- [ ] Fix navigation alignment (remove dead links or create placeholder pages)
+
+### Phase 5: Testing & Optimization
+- [ ] Test with Animations Off (no continuous effects)
+- [ ] Test with prefers-reduced-motion enabled
+- [ ] Verify contrast on light/dark backgrounds
+- [ ] Performance check (no layout thrashing)
+- [ ] Accessibility audit (keyboard nav, screen readers)
+- [ ] Build without errors (npm run build)

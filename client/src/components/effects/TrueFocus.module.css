@@ -1,0 +1,67 @@
+/* TrueFocus Component - Local Scoped Styles */
+
+.trueFocusContainer {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.trueFocusText {
+  position: relative;
+  transition: filter var(--focus-duration, 0.3s) ease-in-out;
+  filter: blur(0);
+}
+
+.trueFocusTextBlurred {
+  filter: blur(var(--blur-amount, 4px));
+}
+
+/* Blur variations */
+.blurSmall {
+  --blur-amount: 2px;
+}
+
+.blurMedium {
+  --blur-amount: 4px;
+}
+
+.blurLarge {
+  --blur-amount: 6px;
+}
+
+/* Animation interval variations */
+.intervalShort {
+  --focus-duration: 0.2s;
+}
+
+.intervalNormal {
+  --focus-duration: 0.4s;
+}
+
+.intervalLong {
+  --focus-duration: 0.6s;
+}
+
+/* Intensity variations */
+.intensityLow {
+  opacity: 0.8;
+}
+
+.intensityHigh {
+  opacity: 1;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .trueFocusText {
+    transition: none;
+    filter: blur(0) !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .trueFocusContainer {
+    /* Adjust contrast for dark backgrounds */
+  }
+}
