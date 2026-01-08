@@ -494,3 +494,74 @@
 - [x] Analyze pokerstars folder for No-Limit Hold'em hands (2,000 hands from 1000NL)
 - [x] Extract 100 high stack depth (>100BB) 3-bet bluff cases (68% fold rate)
 - [x] Create analysis report with extracted cases (3bet_bluff_analysis_report.md)
+
+
+## P7 Hand Simulator & Product Polish
+
+### P0: Hand Simulator Core
+- [ ] Scan project structure and output check report
+- [ ] Build PHH stats (phh_stats.json) for opponent response engine
+- [ ] Create /tools/hand-simulator page with table view
+- [ ] Implement structured input: Hero hand, board, position, stack, pot, action line
+- [ ] Implement opponent type selector (Balanced/Tight/Loose/Aggressive)
+- [ ] Implement recommendation engine: Recommended Action + Why + If Villain...
+- [ ] Implement opponent response after Hero action (at least Flop → Turn)
+- [ ] Add What-if comparison for alternative actions
+- [ ] Add Hand Simulator card to Tools list
+- [ ] Add "Open in Simulator" button in Analyze a Spot results
+- [ ] Add "Use this range in Simulator" button in Ranges page
+
+### P0: Analyze a Spot Product Polish
+- [ ] Add "This tool does..." one-liner
+- [ ] Add "How to use" 3-step guide
+- [ ] Add "Load Example" button with 3 examples (preflop open, SRP flop, 3bet pot flop)
+- [ ] Convert hand input to structured control (Rank1 + Rank2 + suited toggle)
+- [ ] Add skeleton screen when no input
+- [ ] Add "Open in Simulator" button
+
+### P0: Ranges Product Polish
+- [ ] Add legend (Raise/Call/Fold color meanings)
+- [ ] Add usage explanation (scenario, stack depth)
+- [ ] Add click-to-explain for each hand cell
+- [ ] Add "Use this range in Simulator" button
+
+### P1: Data & Engineering
+- [ ] Create data/phh_stats.json with opponent response probabilities
+- [ ] Create scripts/build_phh_stats.py generation script
+- [ ] Add fallback to hard-coded defaults if stats not available
+- [ ] Write unit tests for hand normalization, pot/SPR calculation, probability normalization
+- [ ] Update README with Hand Simulator docs and PHH stats generation
+
+### Acceptance Criteria
+- [ ] /tools/hand-simulator works with all inputs
+- [ ] Opponent responds after Hero action (at least one hop)
+- [ ] Output includes Recommended / Why / If Villain sections
+- [ ] PHH stats influence opponent response (visible in UI)
+- [ ] Analyze a Spot has Load Example, structured input, skeleton, Open in Simulator
+- [ ] Ranges has legend, usage, click explanation, Use in Simulator
+- [ ] Existing navigation and layout style preserved
+- [ ] README + stats script + tests complete
+
+
+## Phase 3: Hand Simulator Feature (Completed)
+
+### Hand Simulator Implementation
+- [x] Create HandSimulator.tsx component with interactive poker table UI
+- [x] Implement PHH-backed opponent response engine (Balanced/Tight/Loose/Aggressive types)
+- [x] Add structured hand input (Card 1 + Card 2 + Suited toggle)
+- [x] Add position and stack depth controls with sliders
+- [x] Add opponent type selector with fold/call/raise percentages
+- [x] Display board cards with visual card representation
+- [x] Implement action buttons (Check/Bet/Fold) with villain response simulation
+- [x] Add street progression (Flop → Turn → River)
+- [x] Display SPR, Fold to Cbet, Raise vs Cbet statistics
+- [x] Add recommended action panel with confidence and EV
+- [x] Add "Why this action?" reasoning section
+- [x] Add "If Villain..." response probability section
+- [x] Add alternatives comparison panel
+- [x] Add newbie guide with 3-step instructions (toggleable)
+- [x] Register route in App.tsx (/tools/hand-simulator)
+- [x] Add to ToolsHub page as first tool
+- [x] Add to Sidebar navigation
+- [x] Write unit tests for Hand Simulator logic (19 tests)
+- [x] All 48 tests passing

@@ -7,7 +7,7 @@
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Calculator, TrendingUp, Target, GitBranch, BookOpen, Brain, Grid3X3, Zap, Crosshair } from "lucide-react";
+import { ArrowLeft, Calculator, TrendingUp, Target, GitBranch, BookOpen, Brain, Grid3X3, Zap, Crosshair, Gamepad2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 
 // Tool illustrations mapping (Open Doodles style)
@@ -20,9 +20,19 @@ const TOOL_ILLUSTRATIONS: Record<string, string> = {
   'quiz': '/illustrations/selfie.svg',
   'strategy-library': '/illustrations/reading.svg',
   'spot-analyzer': '/illustrations/thinking.svg',
+  'hand-simulator': '/illustrations/dancing.svg',
 };
 
 const TOOLS = [
+  {
+    id: 'hand-simulator',
+    title: 'Hand Simulator',
+    description: 'Play out hands against AI opponents with PHH-backed statistics. See how different opponent types respond to your actions.',
+    icon: Gamepad2,
+    path: '/tools/hand-simulator',
+    color: 'teal',
+    theory: 'PHH Dataset + Monte Carlo',
+  },
   {
     id: 'spot-analyzer',
     title: 'Spot Analyzer',
@@ -111,7 +121,7 @@ export default function ToolsHub() {
             <div className="flex-1">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium mb-4">
                 <Zap className="w-4 h-4" />
-                8 Decision Tools
+                9 Decision Tools
               </div>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                 Poker Decision Tools

@@ -23,6 +23,7 @@ import EVCalculator from "./pages/tools/EVCalculator";
 import QuizMode from "./pages/tools/QuizMode";
 import StrategyLibrary from "./pages/tools/StrategyLibrary";
 import SpotAnalyzer from "./pages/tools/SpotAnalyzer";
+import HandSimulator from "./pages/tools/HandSimulator";
 import Trainer from "./pages/Trainer";
 import SavedSpots from "./pages/SavedSpots";
 import ResearchMap from "./pages/ResearchMap";
@@ -51,6 +52,7 @@ function Router() {
       <Route path={"/tools/quiz"} component={QuizMode} />
       <Route path={"/tools/strategy-library"} component={StrategyLibrary} />
       <Route path={"/tools/spot-analyzer"} component={SpotAnalyzer} />
+      <Route path={"/tools/hand-simulator"} component={HandSimulator} />
       {/* Main Pages */}
       <Route path={"/trainer"} component={Trainer} />
       <Route path={"/saved"} component={SavedSpots} />

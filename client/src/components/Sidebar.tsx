@@ -9,7 +9,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
   Menu, X, Target, Brain, Lightbulb, Wrench, History, Bookmark,
-  BookOpen, Zap
+  BookOpen, Zap, Gamepad2
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -32,6 +32,13 @@ const NAV_ITEMS = [
     label: "Ranges",
     icon: Lightbulb,
     href: "/tools/strategy-library",
+    category: "tools"
+  },
+  {
+    id: "simulator",
+    label: "Hand Simulator",
+    icon: Gamepad2,
+    href: "/tools/hand-simulator",
     category: "tools"
   },
   {

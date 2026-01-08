@@ -1,0 +1,177 @@
+{
+  "metadata": {
+    "source": "PHH Dataset (uoftcprg/phh-dataset)",
+    "venues": [
+      "PokerStars"
+    ],
+    "stakes": [
+      "200NL",
+      "400NL",
+      "1000NL"
+    ],
+    "date_range": "2009-07-01 to 2009-07-23",
+    "total_hands": 299948,
+    "total_events": 209165,
+    "files_processed": 300,
+    "files_failed": 0,
+    "generated_at": "2026-01-08",
+    "limitations": [
+      "Only PokerStars hands from July 2009",
+      "PHHS format only (not raw PHH)",
+      "Limited to first 100 files per stake level",
+      "Postflop cbet responses only"
+    ]
+  },
+  "overall": {
+    "fold_to_cbet": 0.519,
+    "call_vs_cbet": 0.362,
+    "raise_vs_cbet": 0.119,
+    "sample_size": 209165
+  },
+  "opponent_types": {
+    "Balanced": {
+      "fold_to_cbet": 0.519,
+      "call_vs_cbet": 0.362,
+      "raise_vs_cbet": 0.119,
+      "description": "Uses PHH overall averages. Represents typical online player."
+    },
+    "Tight": {
+      "fold_to_cbet": 0.674,
+      "call_vs_cbet": 0.253,
+      "raise_vs_cbet": 0.095,
+      "description": "Folds more often, calls less. Plays fewer hands postflop."
+    },
+    "Loose": {
+      "fold_to_cbet": 0.311,
+      "call_vs_cbet": 0.543,
+      "raise_vs_cbet": 0.107,
+      "description": "Folds less, calls more. Sticky player who sees many showdowns."
+    },
+    "Aggressive": {
+      "fold_to_cbet": 0.415,
+      "call_vs_cbet": 0.217,
+      "raise_vs_cbet": 0.25,
+      "description": "Raises frequently, calls less. Applies maximum pressure."
+    }
+  },
+  "by_position": {
+    "BB": {
+      "fold_to_cbet": 0.564,
+      "call_vs_cbet": 0.33,
+      "raise_vs_cbet": 0.106,
+      "sample_size": 68862
+    },
+    "MP": {
+      "fold_to_cbet": 0.476,
+      "call_vs_cbet": 0.388,
+      "raise_vs_cbet": 0.137,
+      "sample_size": 21870
+    },
+    "UTG": {
+      "fold_to_cbet": 0.48,
+      "call_vs_cbet": 0.391,
+      "raise_vs_cbet": 0.128,
+      "sample_size": 19434
+    },
+    "CO": {
+      "fold_to_cbet": 0.469,
+      "call_vs_cbet": 0.39,
+      "raise_vs_cbet": 0.142,
+      "sample_size": 23090
+    },
+    "SB": {
+      "fold_to_cbet": 0.541,
+      "call_vs_cbet": 0.358,
+      "raise_vs_cbet": 0.101,
+      "sample_size": 48315
+    },
+    "BTN": {
+      "fold_to_cbet": 0.463,
+      "call_vs_cbet": 0.393,
+      "raise_vs_cbet": 0.144,
+      "sample_size": 15724
+    },
+    "HJ": {
+      "fold_to_cbet": 0.475,
+      "call_vs_cbet": 0.381,
+      "raise_vs_cbet": 0.144,
+      "sample_size": 4423
+    },
+    "MP+1": {
+      "fold_to_cbet": 0.491,
+      "call_vs_cbet": 0.36,
+      "raise_vs_cbet": 0.149,
+      "sample_size": 3914
+    },
+    "UTG+1": {
+      "fold_to_cbet": 0.47,
+      "call_vs_cbet": 0.397,
+      "raise_vs_cbet": 0.133,
+      "sample_size": 3356
+    },
+    "UNKNOWN": {
+      "fold_to_cbet": 0.503,
+      "call_vs_cbet": 0.35,
+      "raise_vs_cbet": 0.147,
+      "sample_size": 177
+    }
+  },
+  "by_stack": {
+    "100BB+": {
+      "fold_to_cbet": 0.526,
+      "call_vs_cbet": 0.359,
+      "raise_vs_cbet": 0.115,
+      "sample_size": 120298
+    },
+    "20BB": {
+      "fold_to_cbet": 0.543,
+      "call_vs_cbet": 0.313,
+      "raise_vs_cbet": 0.145,
+      "sample_size": 33678
+    },
+    "50BB": {
+      "fold_to_cbet": 0.488,
+      "call_vs_cbet": 0.399,
+      "raise_vs_cbet": 0.113,
+      "sample_size": 55189
+    }
+  },
+  "by_scenario": {
+    "srp_flop": {
+      "fold_to_cbet": 0.541,
+      "call_vs_cbet": 0.33,
+      "raise_vs_cbet": 0.129,
+      "sample_size": 111019
+    },
+    "srp_turn": {
+      "fold_to_cbet": 0.488,
+      "call_vs_cbet": 0.41,
+      "raise_vs_cbet": 0.103,
+      "sample_size": 50908
+    },
+    "srp_river": {
+      "fold_to_cbet": 0.544,
+      "call_vs_cbet": 0.369,
+      "raise_vs_cbet": 0.087,
+      "sample_size": 29532
+    },
+    "3bet_pot_flop": {
+      "fold_to_cbet": 0.429,
+      "call_vs_cbet": 0.394,
+      "raise_vs_cbet": 0.177,
+      "sample_size": 11006
+    },
+    "3bet_pot_river": {
+      "fold_to_cbet": 0.477,
+      "call_vs_cbet": 0.441,
+      "raise_vs_cbet": 0.082,
+      "sample_size": 2298
+    },
+    "3bet_pot_turn": {
+      "fold_to_cbet": 0.389,
+      "call_vs_cbet": 0.468,
+      "raise_vs_cbet": 0.143,
+      "sample_size": 4402
+    }
+  }
+}
