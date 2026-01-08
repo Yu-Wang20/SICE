@@ -485,3 +485,12 @@
 - [x] Update individual tool headers with illustrations (SpotAnalyzer, EVCalculator, QuizMode)
 - [x] Update ToolLayout component to support illustrations, accentColor, and theory badge
 - [x] Test and deliver updated version
+
+
+## P6 PHH Dataset Analysis
+
+- [x] Clone PHH dataset repository from GitHub (uoftcprg/phh-dataset)
+- [x] Understand PHH data format and structure (TOML-like with actions array)
+- [x] Analyze pokerstars folder for No-Limit Hold'em hands (2,000 hands from 1000NL)
+- [x] Extract 100 high stack depth (>100BB) 3-bet bluff cases (68% fold rate)
+- [x] Create analysis report with extracted cases (3bet_bluff_analysis_report.md)
