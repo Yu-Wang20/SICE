@@ -6,6 +6,7 @@
 import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PokerHandAnalyzer from "@/components/PokerHandAnalyzer";
 
 export default function Research() {
   const [, navigate] = useLocation();
@@ -41,6 +42,13 @@ export default function Research() {
               The Strategic Intelligence Atlas provides theoretical foundations. This section explores real-world applications where these principles manifest: from fusion reactors managed by AI, to superhuman game-playing systems, to the cognitive biases that shape human decision-making.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Poker Hand Analysis Section */}
+      <section className="py-24 md:py-32 bg-white border-b-8 border-black">
+        <div className="container">
+          <PokerHandAnalyzer />
         </div>
       </section>
 

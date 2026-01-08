@@ -154,6 +154,14 @@ export default function AIAlgorithmAnalysis() {
                     <strong>Example: Pluribus and ReBeL</strong> <br />
                     Pluribus defeated world-class poker players by maintaining a public belief state (PBS) over possible game configurations and computing strategies robust against all possibilities. ReBeL extended this to nested sub-game solving, allowing real-time adaptation.
                   </p>
+
+                  <div className="bg-orange-50 border-2 border-[#FF6B35] p-6 rounded mt-4">
+                    <p className="font-bold mb-3">Real Poker Case: River All-In with KQ</p>
+                    <p className="text-sm mb-2"><strong>Scenario:</strong> River (final street), 50BB pot. Villain triple-barrels all-in. Hero holds K♥Q♦ (top pair).</p>
+                    <p className="text-sm mb-2"><strong>GTO Says:</strong> Call (Minimum Defense Frequency = 50% of calling range). KQ has ~45% equity.</p>
+                    <p className="text-sm mb-2"><strong>Reality Says:</strong> Fold. Humans under-bluff the river by 40-50%, so Villain's actual range is 70% value.</p>
+                    <p className="text-sm"><strong>AI Advantage:</strong> Pluribus computes belief states over all possible Villain ranges, then selects the action (call/fold) that maximizes expected value against the true distribution. This is why AI dominates: it doesn't rely on heuristics; it reasons about uncertainty.</p>
+                  </div>
                   <p>
                     <strong>Example: DeepSeek-R1</strong> <br />
                     In the domain of language and reasoning, DeepSeek-R1 uses reasoning traces (similar to belief states) to explore multiple solution paths before committing to an answer. This mirrors the imperfect information paradigm: the model doesn't know which reasoning path is correct, so it explores multiple possibilities.
@@ -193,6 +201,13 @@ export default function AIAlgorithmAnalysis() {
                 <p className="text-base">
                   <strong>AI Approach:</strong> Equity sampling using Beta distributions. AI systems compute the exact probability distribution of winning given the current hand and all possible opponent hands. This is far more precise than the Rule of 4-2.
                 </p>
+              </div>
+
+              <div className="bg-orange-50 border-2 border-[#FF6B35] p-6 rounded mb-6">
+                <p className="font-bold mb-2">Real Poker Case: Nut Straight All-In with T8s</p>
+                <p className="text-sm mb-2"><strong>Scenario:</strong> Turn (4th street). Hero has T8s (nut straight on 4-5-6-7). 80BB remaining.</p>
+                <p className="text-sm mb-2"><strong>Human Approach:</strong> Bet big to extract value from overpairs.</p>
+                <p className="text-sm"><strong>AI Approach:</strong> Calculate exact geometric sizing (all-in = 4:1 pot odds) that forces KK/QQ into mathematically impossible decisions. This maximizes expected value by leveraging nut advantage.</p>
               </div>
 
               <div className="bg-gray-50 border-l-4 border-[#FF6B35] p-6 space-y-4">

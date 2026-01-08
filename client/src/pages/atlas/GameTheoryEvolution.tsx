@@ -91,6 +91,16 @@ export default function GameTheoryEvolution() {
               <p>
                 For AI, Nash equilibrium is foundational. When we train game-playing AI systems, we're often searching for Nash equilibria. In perfect information games like chess or Go, there's typically a unique Nash equilibrium (or a set of equivalent ones). In imperfect information games like poker, finding the Nash equilibrium is far more complex—but it remains the theoretical ideal.
               </p>
+
+              <div className="bg-blue-50 border-2 border-[#6B46C1] p-8 rounded-lg">
+                <h4 className="font-bold text-xl mb-4">Real Poker Example: Light 3-Bet with A5s</h4>
+                <div className="space-y-3 text-base">
+                  <p><strong>Scenario:</strong> 6-Max Cash Game, 100BB stacks. Villain opens 2.5BB. Hero (BTN) holds A5s.</p>
+                  <p><strong>GTO Strategy:</strong> 3-Bet to 7.5BB with 30% frequency (mixed strategy).</p>
+                  <p><strong>Why?</strong> A5s blocks opponent AA/AK, has nut flush potential, and creates polarized ranges.</p>
+                  <p><strong>Real-World:</strong> Typical players fold 45-50% vs GTO 35%, creating exploitative opportunities.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
