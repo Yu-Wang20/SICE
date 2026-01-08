@@ -10,6 +10,8 @@ import {
   ChevronRight, Home
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AnimationSettings from "@/components/effects/AnimationSettings";
+import "@/components/effects/AnimationSettings.css";
 import {
   Sheet,
   SheetContent,
@@ -113,6 +115,7 @@ export function Navigation() {
               <Button variant="ghost" size="sm" className="text-gray-500">
                 <Search className="h-4 w-4" />
               </Button>
+              <AnimationSettings />
               <Link href="/tools/ev-calculator">
                 <Button variant="outline" size="sm" className="gap-1">
                   <Play className="h-3 w-3" />

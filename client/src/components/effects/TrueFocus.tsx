@@ -1,133 +1,126 @@
-/**
- * TrueFocus Component
- * Blur/focus effect that toggles on hover or automatically
- * SSR-safe, accessibility-compliant, reduced-motion aware
- */
-
-import React, { useState, useMemo, ReactNode } from 'react';
-import type { ElementType } from 'react';
-import styles from './TrueFocus.module.css';
+"use client";
+import { useEffect, useRef, useState, CSSProperties } from 'react';
+import { motion } from 'motion/react';
+import './TrueFocus.css';
 
 interface TrueFocusProps {
-  children?: ReactNode;
   sentence?: string;
+  separator?: string;
   manualMode?: boolean;
-  blurAmount?: 'small' | 'medium' | 'large';
-  interval?: 'short' | 'normal' | 'long';
-  intensity?: 'low' | 'normal' | 'high';
-  className?: string;
-  as?: ElementType;
+  blurAmount?: number;
+  borderColor?: string;
+  glowColor?: string;
+  animationDuration?: number;
+  pauseBetweenAnimations?: number;
 }
 
-/**
- * TrueFocus - Renders text with blur/focus toggle effect
- * 
- * @param children - Text content (fallback if sentence not provided)
- * @param sentence - Text to display with focus effect
- * @param manualMode - If true, only blur on hover; if false, auto-toggle
- * @param blurAmount - Blur intensity (small: 2px, medium: 4px, large: 6px)
- * @param interval - Animation duration (short: 0.2s, normal: 0.4s, long: 0.6s)
- * @param intensity - Visual intensity (low: 0.8, normal: 1, high: 1)
- * @param className - Additional CSS classes
- * @param as - HTML element to render as (default: span)
- */
-export const TrueFocus = React.forwardRef<HTMLElement, TrueFocusProps>(
-  (
-    {
-      children,
-      sentence = '',
-      manualMode = false,
-      blurAmount = 'medium',
-      interval = 'normal',
-      intensity = 'normal',
-      className = '',
-      as: Component = 'span' as ElementType,
-    },
-    ref
-  ) => {
-    const [isHovered, setIsHovered] = useState(false);
-    const [autoBlurred, setAutoBlurred] = useState(false);
+interface CustomCSSProperties extends CSSProperties {
+  '--border-color'?: string;
+  '--glow-color'?: string;
+}
 
-    // Check for reduced motion preference
-    const prefersReducedMotion = useMemo(() => {
-      if (typeof window === 'undefined') return false;
-      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    }, []);
+const TrueFocus: React.FC<TrueFocusProps> = ({
+  sentence = 'True Focus',
+  separator = ' ',
+  manualMode = false,
+  blurAmount = 5,
+  borderColor = 'green',
+  glowColor = 'rgba(0, 255, 0, 0.6)',
+  animationDuration = 0.5,
+  pauseBetweenAnimations = 1
+}) => {
+  const words = sentence.split(separator);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [lastActiveIndex, setLastActiveIndex] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const [focusRect, setFocusRect] = useState({ x: 0, y: 0, width: 0, height: 0 });
 
-    // Auto-toggle effect (when not in manual mode)
-    React.useEffect(() => {
-      if (manualMode || prefersReducedMotion) return;
-
-      const interval_ms = {
-        short: 2000,
-        normal: 3000,
-        long: 4000,
-      }[interval];
-
-      const timer = setInterval(() => {
-        setAutoBlurred(prev => !prev);
-      }, interval_ms);
-
-      return () => clearInterval(timer);
-    }, [manualMode, interval, prefersReducedMotion]);
-
-    const displayText = sentence || children;
-    const isBlurred = prefersReducedMotion ? false : (manualMode ? isHovered : autoBlurred);
-
-    const blurClass = {
-      small: styles.blurSmall,
-      medium: styles.blurMedium,
-      large: styles.blurLarge,
-    }[blurAmount];
-
-    const intervalClass = {
-      short: styles.intervalShort,
-      normal: styles.intervalNormal,
-      long: styles.intervalLong,
-    }[interval];
-
-    const intensityClass = {
-      low: styles.intensityLow,
-      normal: '',
-      high: styles.intensityHigh,
-    }[intensity];
-
-    const containerClasses = [
-      styles.trueFocusContainer,
-      className,
-    ].filter(Boolean).join(' ');
-
-    const textClasses = [
-      styles.trueFocusText,
-      isBlurred ? styles.trueFocusTextBlurred : '',
-      blurClass,
-      intervalClass,
-      intensityClass,
-    ].filter(Boolean).join(' ');
-
-    const props = {
-      ref,
-      className: containerClasses,
-      onMouseEnter: () => manualMode && setIsHovered(true),
-      onMouseLeave: () => manualMode && setIsHovered(false),
-      role: 'status',
-    };
-
-    return React.createElement(
-      Component as React.ElementType,
-      props,
-      React.createElement(
-        'span',
-        {
-          className: textClasses,
-          'aria-live': 'polite',
+  useEffect(() => {
+    if (!manualMode) {
+      const interval = setInterval(
+        () => {
+          setCurrentIndex(prev => (prev + 1) % words.length);
         },
-        displayText
-      )
-    );
-  }
-);
+        (animationDuration + pauseBetweenAnimations) * 1000
+      );
+      return () => clearInterval(interval);
+    }
+  }, [manualMode, animationDuration, pauseBetweenAnimations, words.length]);
 
-TrueFocus.displayName = 'TrueFocus';
+  useEffect(() => {
+    if (currentIndex === null || currentIndex === -1) return;
+    if (!wordRefs.current[currentIndex] || !containerRef.current) return;
+
+    const parentRect = containerRef.current.getBoundingClientRect();
+    const activeRect = wordRefs.current[currentIndex]!.getBoundingClientRect();
+
+    setFocusRect({
+      x: activeRect.left - parentRect.left,
+      y: activeRect.top - parentRect.top,
+      width: activeRect.width,
+      height: activeRect.height
+    });
+  }, [currentIndex, words.length]);
+
+  const handleMouseEnter = (index: number) => {
+    if (manualMode) {
+      setLastActiveIndex(index);
+      setCurrentIndex(index);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (manualMode && lastActiveIndex !== null) {
+      setCurrentIndex(lastActiveIndex);
+    }
+  };
+
+  return (
+    <div className="focus-container" ref={containerRef}>
+      {words.map((word, index) => {
+        const isActive = index === currentIndex;
+        const spanStyle: CustomCSSProperties = {
+          filter: isActive ? `blur(0px)` : `blur(${blurAmount}px)`,
+          '--border-color': borderColor,
+          '--glow-color': glowColor,
+          transition: `filter ${animationDuration}s ease`
+        };
+        return (
+          <span
+            key={index}
+            ref={el => { wordRefs.current[index] = el; }}
+            className={`focus-word ${manualMode ? 'manual' : ''} ${isActive && !manualMode ? 'active' : ''}`}
+            style={spanStyle}
+            onMouseEnter={() => handleMouseEnter(index)}
+            onMouseLeave={handleMouseLeave}
+          >
+            {word}
+          </span>
+        );
+      })}
+      <motion.div
+        className="focus-frame"
+        animate={{
+          x: focusRect.x,
+          y: focusRect.y,
+          width: focusRect.width,
+          height: focusRect.height,
+          opacity: currentIndex >= 0 ? 1 : 0
+        }}
+        transition={{ duration: animationDuration }}
+        style={{
+          '--border-color': borderColor,
+          '--glow-color': glowColor
+        } as CustomCSSProperties}
+      >
+        <span className="corner top-left"></span>
+        <span className="corner top-right"></span>
+        <span className="corner bottom-left"></span>
+        <span className="corner bottom-right"></span>
+      </motion.div>
+    </div>
+  );
+};
 
 export default TrueFocus;

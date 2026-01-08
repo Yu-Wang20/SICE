@@ -353,13 +353,13 @@
 ## P3 Text Effects Integration (motion/react + anime.js)
 
 ### Phase 1: Rewrite Text Effect Components with motion/react
-- [ ] Create ShinyText.jsx using motion/react (from prompt.docx)
+- [x] Create ShinyText.tsx using motion/react (from prompt.docx)
   * Smooth shine animation with configurable speed
   * Support for pauseOnHover, direction, yoyo modes
   * Disabled state fallback to normal text
   * WebkitTextFillColor handling for accessibility
 
-- [ ] Create TrueFocus.jsx using motion/react (from prompt.docx)
+- [x] Create TrueFocus.tsx using motion/react (from prompt.docx)
   * Focus frame animation around words
   * Manual mode (hover) and auto-toggle mode
   * Configurable blur amount and animation duration

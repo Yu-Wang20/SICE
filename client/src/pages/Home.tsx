@@ -12,6 +12,8 @@ import {
   ChevronDown, Copy, Share2
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import TextFX from "@/components/effects/TextFX";
+import CountUp from "@/components/effects/CountUp";
 
 // Three main entry points
 const ENTRY_POINTS = [
@@ -161,7 +163,9 @@ export default function Home() {
               Poker Decision Engine
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-gray-900 mb-4">
-              Strategic Decision-Making in 10 Seconds
+              <TextFX variant="hero" effect="auto">
+                Strategic Decision-Making in 10 Seconds
+              </TextFX>
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Get instant GTO recommendations, train your instincts, or reference optimal ranges. No fluff, just actionable insights.
@@ -220,19 +224,27 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
-              <div className="text-3xl md:text-4xl font-bold text-emerald-600">7+</div>
+              <div className="text-3xl md:text-4xl font-bold text-emerald-600">
+                <CountUp end={7} duration={1500} suffix="+" />
+              </div>
               <div className="text-sm text-gray-600 mt-1">Decision Tools</div>
             </div>
             <div>
-              <div className="text-3xl md:text-4xl font-bold text-purple-600">1M</div>
+              <div className="text-3xl md:text-4xl font-bold text-purple-600">
+                <CountUp end={1} duration={2000} suffix="M" />
+              </div>
               <div className="text-sm text-gray-600 mt-1">Hands Analyzed</div>
             </div>
             <div>
-              <div className="text-3xl md:text-4xl font-bold text-blue-600">22+</div>
+              <div className="text-3xl md:text-4xl font-bold text-blue-600">
+                <CountUp end={22} duration={1800} suffix="+" />
+              </div>
               <div className="text-sm text-gray-600 mt-1">Training Scenarios</div>
             </div>
             <div>
-              <div className="text-3xl md:text-4xl font-bold text-orange-600">90+</div>
+              <div className="text-3xl md:text-4xl font-bold text-orange-600">
+                <CountUp end={90} duration={2200} suffix="+" />
+              </div>
               <div className="text-sm text-gray-600 mt-1">Years of Theory</div>
             </div>
           </div>

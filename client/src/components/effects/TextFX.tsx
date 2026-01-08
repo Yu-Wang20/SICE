@@ -1,170 +1,183 @@
-/**
- * TextFX Component
- * Unified text effect wrapper with automatic strategy selection
- * Selects appropriate effect based on variant, context, and intensity
- */
-
-import React, { ReactNode, useMemo, ElementType } from 'react';
-import { useAnimation, AnimationIntensity } from '@/contexts/AnimationContext';
+"use client";
+import { useState, useEffect } from 'react';
 import ShinyText from './ShinyText';
 import TrueFocus from './TrueFocus';
 import GlitchText from './GlitchText';
+import { 
+  getEffectiveIntensity, 
+  onAnimationIntensityChange,
+  onPrefersReducedMotionChange,
+  type IntensityLevel
+} from '@/lib/motionPrefs';
 
-export type TextVariant = 'hero' | 'sectionTitle' | 'kpi' | 'resultTag' | 'warning' | 'button' | 'body';
-export type EffectType = 'auto' | 'none' | 'shiny' | 'focus' | 'glitch';
+/**
+ * TextFX - Unified text effect component with automatic strategy selection
+ * 
+ * Variants:
+ * - hero: ShinyText (Normal/High), none (Low/Off)
+ * - sectionTitle: TrueFocus (Normal/High), hover-only (Low), none (Off)
+ * - resultTag: ShinyText (Normal), GlitchText hover-only (High), none (Low/Off)
+ * - kpi: ShinyText (Normal/High), none (Low/Off)
+ * - warning: GlitchText hover-only (High), none (Normal/Low/Off)
+ * - button: Light effects on hover (Normal/High), none (Low/Off)
+ * - body: Always none (readability priority)
+ */
+type TextFXVariant = 'hero' | 'sectionTitle' | 'resultTag' | 'kpi' | 'warning' | 'button' | 'body';
+type TextFXEffect = 'auto' | 'none' | 'shiny' | 'focus' | 'glitch';
 
 interface TextFXProps {
-  children: ReactNode;
-  text?: string;
-  variant?: TextVariant;
-  effect?: EffectType;
-  intensityOverride?: AnimationIntensity;
+  children: React.ReactNode;
+  variant?: TextFXVariant;
+  effect?: TextFXEffect;
   className?: string;
-  as?: ElementType;
+  as?: React.ElementType;
+  speed?: number;
+  color?: string;
+  shineColor?: string;
+  blurAmount?: number;
+  borderColor?: string;
+  glowColor?: string;
+  glitchSpeed?: number;
+  enableShadows?: boolean;
 }
 
-/**
- * Determine which effect to use based on variant and intensity
- */
-function selectEffect(
-  variant: TextVariant,
-  intensity: AnimationIntensity,
-  requestedEffect: EffectType
-): EffectType {
-  // If explicitly requested, use that (unless it's 'auto')
-  if (requestedEffect !== 'auto') {
-    return requestedEffect;
-  }
+const TextFX: React.FC<TextFXProps> = ({
+  children,
+  variant = 'body',
+  effect = 'auto',
+  className = '',
+  as: Component = 'span',
+  // ShinyText props
+  speed = 2,
+  color = '#b5b5b5',
+  shineColor = '#ffffff',
+  // TrueFocus props
+  blurAmount = 5,
+  borderColor = '#10b981',
+  glowColor = 'rgba(16, 185, 129, 0.6)',
+  // GlitchText props
+  glitchSpeed = 1,
+  enableShadows = true
+}) => {
+  const [intensity, setIntensity] = useState<IntensityLevel>('normal');
 
-  // Auto-selection based on variant and intensity
-  switch (variant) {
-    case 'hero':
-      // Hero text: ShinyText with varying intensity
-      return intensity === 'off' ? 'none' : 'shiny';
+  useEffect(() => {
+    // Get initial intensity
+    setIntensity(getEffectiveIntensity());
 
-    case 'kpi':
-      // KPI numbers: ShinyText or countUp (we use Shiny here, countUp handled separately)
-      return intensity === 'off' ? 'none' : intensity === 'low' ? 'none' : 'shiny';
+    // Listen for changes
+    const unsubIntensity = onAnimationIntensityChange((newIntensity) => {
+      setIntensity(newIntensity);
+    });
 
-    case 'sectionTitle':
-      // Section titles: TrueFocus
-      return intensity === 'off' ? 'none' : 'focus';
+    const unsubReduced = onPrefersReducedMotionChange(() => {
+      setIntensity(getEffectiveIntensity());
+    });
 
-    case 'resultTag':
-      // Result tags (FOLD/CALL/RAISE): ShinyText normally, GlitchText on high
-      if (intensity === 'off' || intensity === 'low') return 'none';
-      return intensity === 'high' ? 'glitch' : 'shiny';
+    return () => {
+      unsubIntensity();
+      unsubReduced();
+    };
+  }, []);
 
-    case 'warning':
-      // Warnings: GlitchText only on high, otherwise plain
-      return intensity === 'high' ? 'glitch' : 'none';
-
-    case 'button':
-      // Buttons: Light Shiny on hover (but we don't support hover-only Shiny yet, so none)
-      return 'none';
-
-    case 'body':
-      // Body text: Never use effects
-      return 'none';
-
-    default:
-      return 'none';
-  }
-}
-
-/**
- * TextFX - Unified text effect component
- * 
- * @param children - Text content
- * @param text - Alternative text prop
- * @param variant - Semantic role (hero, kpi, sectionTitle, resultTag, warning, button, body)
- * @param effect - Effect override (auto, none, shiny, focus, glitch)
- * @param intensityOverride - Override global intensity setting
- * @param className - Additional CSS classes
- * @param as - HTML element to render as
- */
-export const TextFX = React.forwardRef<HTMLElement, TextFXProps>(
-  (
-    {
-      children,
-      text,
-      variant = 'body',
-      effect = 'auto',
-      intensityOverride,
-      className = '',
-      as = 'span',
-    },
-    ref
-  ) => {
-    const { intensity: globalIntensity, prefersReducedMotion } = useAnimation();
-    const effectiveIntensity = intensityOverride || globalIntensity;
-
-    // Select effect based on strategy
-    const selectedEffect = useMemo(
-      () => selectEffect(variant, effectiveIntensity, effect),
-      [variant, effectiveIntensity, effect]
-    );
-
-    const displayText = text || children;
-
-    // Render based on selected effect
-    switch (selectedEffect) {
-      case 'shiny':
-        return (
-          <ShinyText
-            ref={ref}
-            as={as}
-            className={className}
-            speed={effectiveIntensity === 'low' ? 'slow' : 'normal'}
-            intensity={effectiveIntensity === 'low' ? 'low' : 'normal'}
-            disabled={prefersReducedMotion}
-          >
-            {displayText}
-          </ShinyText>
-        );
-
-      case 'focus':
-        return (
-          <TrueFocus
-            ref={ref}
-            as={as}
-            className={className}
-            sentence={typeof displayText === 'string' ? displayText : undefined}
-            manualMode={effectiveIntensity === 'low'}
-            blurAmount={effectiveIntensity === 'low' ? 'small' : 'medium'}
-            intensity={effectiveIntensity === 'low' ? 'low' : 'normal'}
-          >
-            {displayText}
-          </TrueFocus>
-        );
-
-      case 'glitch':
-        return (
-          <GlitchText
-            ref={ref}
-            as={as}
-            className={className}
-            enableOnHover={true}
-            intensity={effectiveIntensity === 'high' ? 'high' : 'normal'}
-            disabled={prefersReducedMotion}
-          >
-            {displayText}
-          </GlitchText>
-        );
-
-      case 'none':
-      default:
-        // Render as plain text with optional wrapper
-        const Element = as as ElementType;
-        return (
-          <Element ref={ref} className={className}>
-            {displayText}
-          </Element>
-        );
+  // Determine which effect to use based on variant and intensity
+  const getSelectedEffect = () => {
+    // If effect is explicitly set (not auto), use that
+    if (effect !== 'auto') {
+      return effect;
     }
-  }
-);
 
-TextFX.displayName = 'TextFX';
+    // Auto-selection based on variant and intensity
+    switch (variant) {
+      case 'hero':
+        // Hero text: ShinyText for Normal/High, none for Low/Off
+        return (intensity === 'normal' || intensity === 'high') ? 'shiny' : 'none';
+
+      case 'sectionTitle':
+        // Section titles: TrueFocus for Normal/High, hover-only for Low, none for Off
+        if (intensity === 'off') return 'none';
+        return 'focus';
+
+      case 'resultTag':
+        // Result tags: ShinyText for Normal, GlitchText hover-only for High, none for Low/Off
+        if (intensity === 'high') return 'glitch';
+        if (intensity === 'normal') return 'shiny';
+        return 'none';
+
+      case 'kpi':
+        // KPI numbers: ShinyText for Normal/High, none for Low/Off
+        return (intensity === 'normal' || intensity === 'high') ? 'shiny' : 'none';
+
+      case 'warning':
+        // Warnings: GlitchText hover-only for High, none otherwise
+        return intensity === 'high' ? 'glitch' : 'none';
+
+      case 'button':
+        // Buttons: Light effects on hover for Normal/High, none for Low/Off
+        return (intensity === 'normal' || intensity === 'high') ? 'shiny' : 'none';
+
+      case 'body':
+      default:
+        // Body text: Never use effects (readability priority)
+        return 'none';
+    }
+  };
+
+  const selectedEffect = getSelectedEffect();
+  const text = typeof children === 'string' ? children : '';
+
+  // Render based on selected effect
+  switch (selectedEffect) {
+    case 'shiny':
+      // @ts-ignore - ShinyText is a JSX component
+      return (
+        <ShinyText
+          text={text}
+          speed={variant === 'hero' ? 3 : speed}
+          color={color}
+          shineColor={shineColor}
+          className={className}
+          disabled={intensity === 'off'}
+          pauseOnHover={variant === 'button'}
+        />
+      );
+
+    case 'focus':
+      // @ts-ignore - TrueFocus is a JSX component
+      return (
+        <TrueFocus
+          sentence={text}
+          blurAmount={intensity === 'low' ? 3 : blurAmount}
+          borderColor={borderColor}
+          glowColor={glowColor}
+          manualMode={intensity === 'low'}
+          animationDuration={0.5}
+          pauseBetweenAnimations={1.5}
+        />
+      );
+
+    case 'glitch':
+      // @ts-ignore - GlitchText is a JSX component
+      return (
+        <GlitchText
+          speed={glitchSpeed}
+          enableShadows={enableShadows}
+          enableOnHover={true}
+          className={className}
+        >
+          {children}
+        </GlitchText>
+      );
+
+    case 'none':
+    default:
+      // Render as plain text with optional wrapper
+      return (
+        <Component className={className}>
+          {children}
+        </Component>
+      );
+  }
+};
 
 export default TextFX;

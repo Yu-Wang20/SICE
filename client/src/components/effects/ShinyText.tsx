@@ -1,97 +1,125 @@
-/**
- * ShinyText Component
- * Smooth shine animation effect for text
- * SSR-safe, accessibility-compliant, reduced-motion aware
- */
-
-import React, { useMemo, ReactNode } from 'react';
-import type { ElementType } from 'react';
-import styles from './ShinyText.module.css';
+"use client";
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { motion, useMotionValue, useAnimationFrame, useTransform } from 'motion/react';
+import './ShinyText.css';
 
 interface ShinyTextProps {
-  children: ReactNode;
-  speed?: 'slow' | 'normal' | 'fast';
-  intensity?: 'low' | 'normal' | 'high';
+  text: string;
   disabled?: boolean;
+  speed?: number;
   className?: string;
-  as?: ElementType;
+  color?: string;
+  shineColor?: string;
+  spread?: number;
+  yoyo?: boolean;
+  pauseOnHover?: boolean;
+  direction?: 'left' | 'right';
+  delay?: number;
 }
 
-/**
- * ShinyText - Renders text with smooth shine animation
- * 
- * @param children - Text content to animate
- * @param speed - Animation speed (slow: 5s, normal: 3s, fast: 1.5s)
- * @param intensity - Visual intensity (low: 0.7, normal: 1, high: 1)
- * @param disabled - If true, disables animation and shows plain text
- * @param className - Additional CSS classes
- * @param as - HTML element to render as (default: span)
- */
-export const ShinyText = React.forwardRef<HTMLElement, ShinyTextProps>(
-  (
-    {
-      children,
-      speed = 'normal',
-      intensity = 'normal',
-      disabled = false,
-      className = '',
-      as: Component = 'span' as ElementType,
-    },
-    ref
-  ) => {
-    // Check for reduced motion preference (client-side only)
-    const prefersReducedMotion = useMemo(() => {
-      if (typeof window === 'undefined') return false;
-      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    }, []);
+const ShinyText: React.FC<ShinyTextProps> = ({
+  text,
+  disabled = false,
+  speed = 2,
+  className = '',
+  color = '#b5b5b5',
+  shineColor = '#ffffff',
+  spread = 120,
+  yoyo = false,
+  pauseOnHover = false,
+  direction = 'left',
+  delay = 0
+}) => {
+  const [isPaused, setIsPaused] = useState(false);
+  const progress = useMotionValue(0);
 
-    // Disable animation if reduced motion is preferred or disabled prop is true
-    const shouldAnimate = !prefersReducedMotion && !disabled;
+  const elapsedRef = useRef<number>(0);
+  const lastTimeRef = useRef<number | null>(null);
+  const directionRef = useRef<number>(direction === 'left' ? 1 : -1);
+  const animationDuration = speed * 1000;
+  const delayDuration = delay * 1000;
 
-    const speedClass = {
-      slow: styles.shinyTextSlow,
-      normal: styles.shinyTextNormal,
-      fast: styles.shinyTextFast,
-    }[speed];
+  useAnimationFrame((time: number) => {
+    if (disabled || isPaused) {
+      lastTimeRef.current = null;
+      return;
+    }
 
-    const intensityClass = {
-      low: styles.shinyTextLow,
-      normal: '',
-      high: styles.shinyTextHigh,
-    }[intensity];
+    if (lastTimeRef.current === null) {
+      lastTimeRef.current = time;
+      return;
+    }
 
-    const containerClasses = [
-      styles.shinyContainer,
-      className,
-    ].filter(Boolean).join(' ');
+    const deltaTime = time - lastTimeRef.current;
+    lastTimeRef.current = time;
+    elapsedRef.current += deltaTime;
 
-    const textClasses = [
-      shouldAnimate ? styles.shinyText : styles.shinyTextDisabled,
-      speedClass,
-      intensityClass,
-    ].filter(Boolean).join(' ');
+    if (yoyo) {
+      const cycleDuration = animationDuration + delayDuration;
+      const fullCycle = cycleDuration * 2;
+      const cycleTime = elapsedRef.current % fullCycle;
 
-    const props = {
-      ref,
-      className: containerClasses,
-    };
+      if (cycleTime < animationDuration) {
+        const p = (cycleTime / animationDuration) * 100;
+        progress.set(directionRef.current === 1 ? p : 100 - p);
+      } else if (cycleTime < cycleDuration) {
+        progress.set(directionRef.current === 1 ? 100 : 0);
+      } else if (cycleTime < cycleDuration + animationDuration) {
+        const reverseTime = cycleTime - cycleDuration;
+        const p = 100 - (reverseTime / animationDuration) * 100;
+        progress.set(directionRef.current === 1 ? p : 100 - p);
+      } else {
+        progress.set(directionRef.current === 1 ? 0 : 100);
+      }
+    } else {
+      const cycleDuration = animationDuration + delayDuration;
+      const cycleTime = elapsedRef.current % cycleDuration;
 
-    return React.createElement(
-      Component as React.ElementType,
-      props,
-      React.createElement(
-        'span',
-        {
-          className: textClasses,
-          role: disabled ? 'status' : undefined,
-          'aria-disabled': disabled,
-        },
-        children
-      )
-    );
-  }
-);
+      if (cycleTime < animationDuration) {
+        const p = (cycleTime / animationDuration) * 100;
+        progress.set(directionRef.current === 1 ? p : 100 - p);
+      } else {
+        progress.set(directionRef.current === 1 ? 100 : 0);
+      }
+    }
+  });
 
-ShinyText.displayName = 'ShinyText';
+  useEffect(() => {
+    directionRef.current = direction === 'left' ? 1 : -1;
+    elapsedRef.current = 0;
+    progress.set(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [direction]);
+
+  const backgroundPosition = useTransform(progress, (p: number) => `${150 - p * 2}% center`);
+
+  const handleMouseEnter = useCallback(() => {
+    if (pauseOnHover) setIsPaused(true);
+  }, [pauseOnHover]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (pauseOnHover) setIsPaused(false);
+  }, [pauseOnHover]);
+
+  // NOTE: disabled 时 TextFX 会让它走"普通文字渲染"，这里仍保留渐变逻辑
+  const gradientStyle = {
+    backgroundImage: `linear-gradient(${spread}deg, ${color} 0%, ${color} 35%, ${shineColor} 50%, ${color} 65%, ${color} 100%)`,
+    backgroundSize: '200% auto',
+    WebkitBackgroundClip: 'text',
+    backgroundClip: 'text',
+    WebkitTextFillColor: 'transparent'
+  };
+
+  return (
+    <motion.span
+      className={`shiny-text ${className}`}
+      style={{ ...gradientStyle, backgroundPosition }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {text}
+    </motion.span>
+  );
+};
 
 export default ShinyText;

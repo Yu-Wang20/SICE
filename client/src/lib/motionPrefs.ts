@@ -3,28 +3,28 @@
  * Handles global animation intensity settings and prefers-reduced-motion detection
  */
 
+export type IntensityLevel = 'off' | 'low' | 'normal' | 'high';
+
 const STORAGE_KEY = 'animation-intensity';
-const INTENSITY_LEVELS = ['off', 'low', 'normal', 'high'];
+const INTENSITY_LEVELS: IntensityLevel[] = ['off', 'low', 'normal', 'high'];
 
 /**
  * Get current animation intensity from localStorage
- * @returns {string} 'off' | 'low' | 'normal' | 'high'
  */
-export function getAnimationIntensity() {
+export function getAnimationIntensity(): IntensityLevel {
   if (typeof window === 'undefined') return 'normal';
   
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored && INTENSITY_LEVELS.includes(stored)) {
-    return stored;
+  if (stored && INTENSITY_LEVELS.includes(stored as IntensityLevel)) {
+    return stored as IntensityLevel;
   }
   return 'normal';
 }
 
 /**
  * Set animation intensity and save to localStorage
- * @param {string} intensity - 'off' | 'low' | 'normal' | 'high'
  */
-export function setAnimationIntensity(intensity) {
+export function setAnimationIntensity(intensity: IntensityLevel): void {
   if (typeof window === 'undefined') return;
   
   if (!INTENSITY_LEVELS.includes(intensity)) {
@@ -40,9 +40,8 @@ export function setAnimationIntensity(intensity) {
 
 /**
  * Check if system prefers reduced motion
- * @returns {boolean}
  */
-export function prefersReducedMotion() {
+export function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined') return false;
   
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -51,9 +50,8 @@ export function prefersReducedMotion() {
 /**
  * Get effective animation intensity considering system preference
  * If system prefers reduced motion, force 'off'
- * @returns {string} 'off' | 'low' | 'normal' | 'high'
  */
-export function getEffectiveIntensity() {
+export function getEffectiveIntensity(): IntensityLevel {
   if (prefersReducedMotion()) {
     return 'off';
   }
@@ -62,22 +60,20 @@ export function getEffectiveIntensity() {
 
 /**
  * Check if animations are enabled
- * @returns {boolean}
  */
-export function isAnimationsEnabled() {
+export function isAnimationsEnabled(): boolean {
   return getEffectiveIntensity() !== 'off';
 }
 
 /**
  * Listen for animation intensity changes
- * @param {Function} callback - Called with { intensity } when intensity changes
- * @returns {Function} Unsubscribe function
  */
-export function onAnimationIntensityChange(callback) {
+export function onAnimationIntensityChange(callback: (intensity: IntensityLevel) => void): () => void {
   if (typeof window === 'undefined') return () => {};
   
-  const handler = (event) => {
-    callback(event.detail.intensity);
+  const handler = (event: Event) => {
+    const customEvent = event as CustomEvent<{ intensity: IntensityLevel }>;
+    callback(customEvent.detail.intensity);
   };
   
   window.addEventListener('animation-intensity-changed', handler);
@@ -89,15 +85,13 @@ export function onAnimationIntensityChange(callback) {
 
 /**
  * Listen for system prefers-reduced-motion changes
- * @param {Function} callback - Called with boolean when preference changes
- * @returns {Function} Unsubscribe function
  */
-export function onPrefersReducedMotionChange(callback) {
+export function onPrefersReducedMotionChange(callback: (prefersReduced: boolean) => void): () => void {
   if (typeof window === 'undefined') return () => {};
   
   const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
   
-  const handler = (e) => {
+  const handler = (e: MediaQueryListEvent) => {
     callback(e.matches);
   };
   

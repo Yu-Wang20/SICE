@@ -7,30 +7,32 @@ import {
   onAnimationIntensityChange 
 } from '@/lib/motionPrefs';
 
+type IntensityLevel = 'off' | 'low' | 'normal' | 'high';
+
 export default function AnimationSettings() {
-  const [intensity, setIntensity] = useState('normal');
-  const [prefersReduced, setPrefersReduced] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [intensity, setIntensity] = useState<IntensityLevel>('normal');
+  const [prefersReduced, setPrefersReduced] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useEffect(() => {
     // Load initial values
-    setIntensity(getAnimationIntensity());
+    setIntensity(getAnimationIntensity() as IntensityLevel);
     setPrefersReduced(prefersReducedMotion());
 
     // Listen for changes
-    const unsubscribe = onAnimationIntensityChange((newIntensity) => {
-      setIntensity(newIntensity);
+    const unsubscribe = onAnimationIntensityChange((newIntensity: string) => {
+      setIntensity(newIntensity as IntensityLevel);
     });
 
     return unsubscribe;
   }, []);
 
-  const handleIntensityChange = (newIntensity) => {
+  const handleIntensityChange = (newIntensity: IntensityLevel): void => {
     setAnimationIntensity(newIntensity);
     setIntensity(newIntensity);
   };
 
-  const effectiveIntensity = prefersReduced ? 'off' : intensity;
+  const effectiveIntensity: IntensityLevel = prefersReduced ? 'off' : intensity;
 
   return (
     <div className="animation-settings">
@@ -68,7 +70,7 @@ export default function AnimationSettings() {
             <div className="intensity-selector">
               <label>Animation Intensity:</label>
               <div className="intensity-options">
-                {['off', 'low', 'normal', 'high'].map((level) => (
+                {(['off', 'low', 'normal', 'high'] as IntensityLevel[]).map((level) => (
                   <button
                     key={level}
                     className={`intensity-button ${effectiveIntensity === level ? 'active' : ''} ${prefersReduced ? 'disabled' : ''}`}

@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingUp, TrendingDown, Minus, ChevronDown, AlertCircle } from "lucide-react";
 import ToolLayout from "@/components/ToolLayout";
 import { validatePercentage, validatePotSize, validateBetSize } from "@/utils/validation";
+import TextFX from "@/components/effects/TextFX";
 
 interface EVResult {
   foldEV: number;
@@ -335,7 +336,7 @@ export default function EVCalculator() {
               result.bestAction === 'CALL' ? 'text-green-600' :
               'text-purple-600'
             }`}>
-              {result.bestAction}
+              <TextFX variant="resultTag">{result.bestAction}</TextFX>
             </div>
             <p className="text-sm text-gray-600">
               {result.bestAction === 'FOLD' && 'Fold to preserve chips'}
