@@ -18,7 +18,7 @@ export default function Home() {
           <div className="max-w-5xl space-y-8">
             <div className="space-y-6">
               <h1 className="text-7xl md:text-8xl lg:text-9xl font-bold leading-tight">
-                The Fusion Reactor Run by AI, the Grandmaster Beaten by a Novice, and the Flaw in Your Own Brain
+                Strategic Intelligence Atlas
               </h1>
             </div>
 
