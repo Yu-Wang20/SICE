@@ -48,3 +48,30 @@
 - [x] Strategy Library - preflop ranges and decision matrices
 - [ ] Progress Tracking - save practice records, show improvement curves
 - [ ] Hand History Upload - analyze decisions vs GTO baseline
+
+## P1 Critical UI Improvements
+- [x] Add skeleton loading screens for first paint
+- [x] Improve error boundary with retry/refresh buttons
+- [x] Restructure navigation as product-style (Atlas/Tools/Trainer/Cases/About)
+- [x] Make navigation sticky with current page highlight
+- [ ] Add quick actions (Search/Upload/Demo) to nav
+- [x] Add breadcrumb navigation below main nav
+- [x] Implement responsive hamburger menu for mobile
+
+## P1 High-Value Changes
+- [x] Redesign Hero as product promise (H1 + Subhead + 3 bullets + 2 CTAs)
+- [x] Transform pillar cards into clickable navigation components with hover effects
+- [x] Add distinct icons for each pillar (Math/Game Theory/AI/Matrix)
+- [x] Add progress/reading time and quick actions to pillar cards
+
+## P2 Visual Polish
+- [x] Implement consistent accent color system (emerald as primary)
+- [x] Add definition callouts and info blocks with background colors
+- [x] Improve typography hierarchy (H1/H2/H3 spacing)
+- [ ] Add Table of Contents for long articles
+- [ ] Add reading progress bar
+
+## P3 Tool Enhancements (if time permits)
+- [ ] Expand quiz to 20+ questions
+- [ ] Add progress tracking with accuracy curves
+- [ ] Hand history upload feature

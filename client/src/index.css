@@ -4,10 +4,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
-  --radius-xl: 0;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -41,65 +41,75 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   
-  /* Swiss Brutalist Design Tokens */
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Typography */
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   
-  /* Accent Colors - Semantic Mapping */
-  --color-ai-blue: oklch(0.55 0.25 250);
-  --color-game-purple: oklch(0.50 0.20 290);
-  --color-cognitive-orange: oklch(0.65 0.20 40);
-  --color-innovation-green: oklch(0.60 0.18 160);
-  --color-economics-red: oklch(0.55 0.22 25);
+  /* Unified Accent Color - Emerald */
+  --color-accent-primary: oklch(0.60 0.18 160);
+  --color-accent-primary-light: oklch(0.95 0.05 160);
+  
+  /* Semantic Colors for Pillars */
+  --color-pillar-math: oklch(0.55 0.25 250);
+  --color-pillar-game: oklch(0.50 0.20 290);
+  --color-pillar-ai: oklch(0.65 0.20 40);
+  --color-pillar-matrix: oklch(0.60 0.18 160);
 }
 
 :root {
-  --primary: oklch(0 0 0);
+  --primary: oklch(0.60 0.18 160);
   --primary-foreground: oklch(1 0 0);
-  --sidebar-primary: oklch(0 0 0);
+  --sidebar-primary: oklch(0.60 0.18 160);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --chart-1: var(--color-ai-blue);
-  --chart-2: var(--color-game-purple);
-  --chart-3: var(--color-cognitive-orange);
-  --chart-4: var(--color-innovation-green);
-  --chart-5: var(--color-economics-red);
-  --radius: 0;
+  --chart-1: oklch(0.55 0.25 250);
+  --chart-2: oklch(0.50 0.20 290);
+  --chart-3: oklch(0.65 0.20 40);
+  --chart-4: oklch(0.60 0.18 160);
+  --chart-5: oklch(0.55 0.22 25);
+  --radius: 0.5rem;
   --background: oklch(1 0 0);
-  --foreground: oklch(0 0 0);
+  --foreground: oklch(0.15 0 0);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0 0 0);
+  --card-foreground: oklch(0.15 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0 0 0);
-  --secondary: oklch(0.95 0 0);
-  --secondary-foreground: oklch(0.2 0 0);
-  --muted: oklch(0.96 0 0);
-  --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0 0 0);
-  --accent-foreground: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.25 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.50 0 0);
+  --accent: oklch(0.95 0.05 160);
+  --accent-foreground: oklch(0.30 0.10 160);
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0 0 0);
-  --input: oklch(0.9 0 0);
-  --ring: oklch(0 0 0);
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0 0 0);
-  --sidebar-accent: oklch(0.95 0 0);
-  --sidebar-accent-foreground: oklch(0 0 0);
-  --sidebar-border: oklch(0 0 0);
-  --sidebar-ring: oklch(0 0 0);
+  --border: oklch(0.90 0 0);
+  --input: oklch(0.95 0 0);
+  --ring: oklch(0.60 0.18 160);
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: oklch(0.15 0 0);
+  --sidebar-accent: oklch(0.95 0.05 160);
+  --sidebar-accent-foreground: oklch(0.30 0.10 160);
+  --sidebar-border: oklch(0.90 0 0);
+  --sidebar-ring: oklch(0.60 0.18 160);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
   }
+  
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [type="button"]:not(:disabled),
@@ -112,14 +122,39 @@
     @apply cursor-pointer;
   }
   
-  h1, h2, h3, h4, h5, h6 {
+  /* Typography Hierarchy */
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+  
+  h2 {
     font-family: var(--font-display);
     font-weight: 700;
     letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  
+  h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
   }
   
   code, pre {
     font-family: var(--font-mono);
+  }
+  
+  /* Prose - Optimal reading width */
+  .prose {
+    max-width: 65ch;
+  }
+  
+  .prose p {
+    margin-bottom: 1.25em;
   }
 }
 
@@ -152,29 +187,51 @@
     }
   }
   
-  /* Swiss Brutalist Utilities */
-  .section-divider {
-    height: 8px;
-    background: oklch(0 0 0);
-    width: 100%;
+  /* Definition Callout */
+  .callout-definition {
+    @apply bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg my-4;
   }
   
-  .diagonal-cut-top {
-    clip-path: polygon(0 0, 100% 8%, 100% 100%, 0 100%);
-    margin-top: -5rem;
-    padding-top: 8rem;
+  .callout-definition-title {
+    @apply font-semibold text-blue-800 mb-1;
   }
   
-  .diagonal-cut-bottom {
-    clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%);
-    margin-bottom: -5rem;
-    padding-bottom: 8rem;
+  .callout-definition-content {
+    @apply text-blue-700;
   }
   
-  .outline-text {
-    -webkit-text-stroke: 2px currentColor;
-    -webkit-text-fill-color: transparent;
-    paint-order: stroke fill;
+  /* Info Block */
+  .callout-info {
+    @apply bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-lg my-4;
+  }
+  
+  /* Warning Block */
+  .callout-warning {
+    @apply bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg my-4;
+  }
+  
+  /* Quote Block */
+  .callout-quote {
+    @apply bg-gray-50 border-l-4 border-gray-400 p-4 rounded-r-lg my-4 italic;
+  }
+  
+  /* Key Takeaway */
+  .callout-takeaway {
+    @apply bg-purple-50 border-l-4 border-purple-500 p-4 rounded-r-lg my-4;
+  }
+  
+  /* Card hover effect */
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5;
+  }
+  
+  /* Reading Progress Bar */
+  .reading-progress {
+    @apply fixed top-0 left-0 right-0 h-1 bg-gray-100 z-[60];
+  }
+  
+  .reading-progress-bar {
+    @apply h-full bg-emerald-500 transition-all duration-150;
   }
 }
 
@@ -192,5 +249,15 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+  
+  /* Text balance for headings */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-600;
   }
 }
