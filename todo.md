@@ -3,40 +3,40 @@
 ## P0 CRITICAL: Time-to-First-Value UX Redesign (New Priority)
 
 ### P0-1: Redesign Homepage as Three-Entry-Point Hub
-- [ ] Replace current hero with three large buttons: Analyze a Spot, Start Training, Open Ranges
-- [ ] Add Quick Spot Bar below (Position/Stacks/Action Line/Opponent Type → instant recommendation)
-- [ ] Target: 10 seconds to first actionable insight
+- [x] Replace current hero with three large buttons: Analyze a Spot, Start Training, Open Ranges
+- [x] Add Quick Spot Bar below (Position/Stacks/Action Line/Opponent Type → instant recommendation)
+- [x] Target: 10 seconds to first actionable insight
 
 ### P0-2: Persistent Sidebar Navigation (No Back Buttons)
-- [ ] Create fixed left sidebar with: Spot Analyzer, Trainer, Ranges, Tools, History, Saved
-- [ ] One-click switching between sections (no back button required)
-- [ ] Highlight current active section
-- [ ] Collapse on mobile to hamburger
+- [x] Create fixed left sidebar with: Spot Analyzer, Trainer, Ranges, Tools, History, Saved
+- [x] One-click switching between sections (no back button required)
+- [x] Highlight current active section
+- [x] Collapse on mobile to hamburger
 
 ### P0-3: Real-Time Tool Calculations (Remove Calculate Buttons)
-- [ ] EV Calculator: slider/input changes → instant result update (200ms debounce)
+- [x] EV Calculator: slider/input changes → instant result update (200ms debounce)
 - [ ] Position Simulator: tree updates live as parameters change
 - [ ] Pot Odds: immediate calculation on input change
 - [ ] Hand Strength: live update on hand/board selection
 - [ ] Strategy Library: instant range display on filter change
 
 ### P0-4: Unified Left-Input / Right-Result Workbench Layout
-- [ ] All tools: left panel (fixed width, collapsible advanced) + right panel (always visible results)
-- [ ] No scrolling to see results
-- [ ] Consistent spacing and alignment across all tools
-- [ ] Mobile: stack vertically with sticky result header
+- [x] All tools: left panel (fixed width, collapsible advanced) + right panel (always visible results)
+- [x] No scrolling to see results
+- [x] Consistent spacing and alignment across all tools
+- [x] Mobile: stack vertically with sticky result header
 
 ### P0-5: Action-First Result Presentation
-- [ ] Result order: Recommended Action (huge) → EV/Frequency/Threshold (compact) → Details (collapsible)
-- [ ] Fold/Call/Raise as clear colored buttons/badges
-- [ ] Hide verbose explanations by default (expandable)
-- [ ] Show key reasoning in 3 bullets max
+- [x] Result order: Recommended Action (huge) → EV/Frequency/Threshold (compact) → Details (collapsible)
+- [x] Fold/Call/Raise as clear colored buttons/badges
+- [x] Hide verbose explanations by default (expandable)
+- [x] Show key reasoning in 3 bullets max
 
 ### P0-6: History & Favorites System
-- [ ] Auto-save last 10 spots (with naming)
-- [ ] Trainer: daily streak counter + weak category tags
-- [ ] Ranges: save favorite positions
-- [ ] History sidebar entry with quick access
+- [x] Auto-save last 10 spots (with naming)
+- [x] Trainer: daily streak counter + weak category tags
+- [x] Ranges: save favorite positions
+- [x] History sidebar entry with quick access
 
 ## Core Features (Completed)
 - [x] Hand Strength Evolution Query (input hand/board → output strength + improvement probability)
@@ -127,6 +127,9 @@
 - [x] Fix EV Calculator - ensure Calculate button displays results (added tabs, implied odds, reverse implied odds)
 - [x] Fix Position Simulator - correct unrealistic EV values (2000% → realistic range)
 - [x] Verify all calculations with real GTO data
+- [x] Fix missing /tools/spot-analyzer route (404 error)
+- [x] Create SpotAnalyzer component with real-time GTO analysis
+- [x] Register route in App.tsx
 
 ## P1a Quiz Enhancement
 - [ ] Add error tracking/wrong answer history
