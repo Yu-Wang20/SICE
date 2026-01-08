@@ -37,6 +37,14 @@ export default function Home() {
               </Button>
               <Button
                 size="lg"
+                className="bg-green-600 text-white hover:bg-green-700 text-lg px-8 py-6"
+                onClick={() => navigate("/tools")}
+              >
+                Poker Decision Tools
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <Button
+                size="lg"
                 variant="outline"
                 className="border-2 border-black text-black hover:bg-black hover:text-white text-lg px-8 py-6"
                 onClick={() => navigate("/research")}

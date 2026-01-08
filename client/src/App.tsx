@@ -12,11 +12,20 @@ import AIAlgorithmAnalysis from "./pages/atlas/AIAlgorithmAnalysis";
 import DecisionMatrix from "./pages/atlas/DecisionMatrix";
 import Insights from "./pages/atlas/Insights";
 import Research from "./pages/Research";
+// Poker Decision Tools
+import ToolsHub from "./pages/tools/ToolsHub";
+import HandStrength from "./pages/tools/HandStrength";
+import PotOdds from "./pages/tools/PotOdds";
+import PushFold from "./pages/tools/PushFold";
+import PositionSimulator from "./pages/tools/PositionSimulator";
+import ResearchMap from "./pages/ResearchMap";
 
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      {/* Atlas Routes */}
       <Route path={"/atlas"} component={AtlasHub} />
       <Route path={"/atlas/mathematical-foundations"} component={MathematicalFoundations} />
       <Route path={"/atlas/game-theory-evolution"} component={GameTheoryEvolution} />
@@ -24,6 +33,13 @@ function Router() {
       <Route path={"/atlas/decision-matrix"} component={DecisionMatrix} />
       <Route path={"/atlas/insights"} component={Insights} />
       <Route path={"/research"} component={Research} />
+      {/* Poker Decision Tools */}
+      <Route path={"/tools"} component={ToolsHub} />
+      <Route path={"/tools/hand-strength"} component={HandStrength} />
+      <Route path={"/tools/pot-odds"} component={PotOdds} />
+      <Route path={"/tools/push-fold"} component={PushFold} />
+      <Route path={"/tools/position"} component={PositionSimulator} />
+      <Route path={"/research-map"} component={ResearchMap} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
