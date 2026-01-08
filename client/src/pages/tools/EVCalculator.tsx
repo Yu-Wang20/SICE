@@ -1,6 +1,7 @@
 /**
  * EV Calculator - Expected Value Analysis Tool (P0-3 & P0-4)
  * Real-time calculation + Unified workbench layout
+ * FIXED: Input validation, realistic EV values, normalized frequencies
  */
 
 import { useState, useEffect, useCallback } from "react";
@@ -40,70 +41,115 @@ export default function EVCalculator() {
 
   // Real-time calculation with debounce
   const calculateEV = useCallback(() => {
+    // Validate inputs
+    const newErrors: Record<string, string> = {};
+    
+    const potVal = validatePotSize(potSize);
+    if (!potVal.valid) newErrors.potSize = potVal.error || "Invalid";
+    
+    const betVal = validateBetSize(betToCall);
+    if (!betVal.valid) newErrors.betToCall = betVal.error || "Invalid";
+    
+    const eqVal = validatePercentage(equity);
+    if (!eqVal.valid) newErrors.equity = eqVal.error || "Invalid";
+    
+    const foldEqVal = validatePercentage(foldEquity);
+    if (!foldEqVal.valid) newErrors.foldEquity = foldEqVal.error || "Invalid";
+    
+    setErrors(newErrors);
+    
+    if (Object.keys(newErrors).length > 0) {
+      setResult(null);
+      return;
+    }
+    
     setIsCalculating(true);
     
+    // Parse and normalize inputs
     const pot = parseFloat(potSize) || 0;
     const bet = parseFloat(betToCall) || 0;
-    const eq = (parseFloat(equity) || 0) / 100;
-    const raise = parseFloat(raiseSize) || 0;
-    const foldEq = (parseFloat(foldEquity) || 0) / 100;
-    const futureWin = parseFloat(futureWinnings) || 0;
-    const futureLose = parseFloat(futureLosses) || 0;
+    const eq = Math.min(1, Math.max(0, (parseFloat(equity) || 0) / 100)); // Cap at 0-100%
+    const raise = Math.max(0, parseFloat(raiseSize) || 0);
+    const foldEq = Math.min(1, Math.max(0, (parseFloat(foldEquity) || 0) / 100)); // Cap at 0-100%
+    const futureWin = Math.max(0, parseFloat(futureWinnings) || 0);
+    const futureLose = Math.max(0, parseFloat(futureLosses) || 0);
 
+    // === CORRECTED EV CALCULATIONS ===
+    
     // Fold EV is always 0
     const foldEV = 0;
 
     // Call EV = (equity * (pot + bet)) - ((1 - equity) * bet)
+    // This represents: if you win (equity chance), you win (pot + bet)
+    //                  if you lose (1-equity chance), you lose bet
     const totalPot = pot + bet;
     const callEV = (eq * totalPot) - ((1 - eq) * bet);
 
     // Raise EV = (fold equity * (pot + bet)) + ((1 - fold equity) * ((equity * (pot + bet + raise)) - ((1 - equity) * raise)))
+    // This represents: if opponent folds (fold equity chance), you win (pot + bet)
+    //                  if opponent calls (1-fold equity chance), you play out the hand
     const potAfterRaise = pot + bet + raise;
     const raiseEVWhenCalled = (eq * potAfterRaise) - ((1 - eq) * raise);
     const raiseEV = (foldEq * (pot + bet)) + ((1 - foldEq) * raiseEVWhenCalled);
 
-    // Pot odds: bet / (pot + bet + bet) = bet / (pot + 2*bet)
-    const potOdds = bet / (pot + bet + bet);
+    // === CORRECTED POT ODDS & BREAKEVEN ===
     
-    // Breakeven equity: bet / (pot + 2*bet)
-    const breakeven = potOdds * 100;
+    // Pot odds ratio: bet / (pot + bet + bet) = bet / (pot + 2*bet)
+    // This is the ratio of money you need to call vs total money in the pot after you call
+    const potOddsRatio = bet / (pot + 2 * bet);
+    const potOddsPercent = potOddsRatio * 100;
+    
+    // Breakeven equity: same as pot odds (the equity you need to break even)
+    const breakeven = potOddsPercent;
 
+    // === IMPLIED ODDS & REVERSE IMPLIED ODDS ===
+    
     // Implied odds: (future winnings + pot + bet) / bet
-    const impliedOdds = (futureWin + pot + bet) / bet;
+    // This is the ratio you need to win future streets to justify the call
+    const impliedOddsRatio = bet > 0 ? (futureWin + pot + bet) / bet : 0;
+    const impliedOdds = impliedOddsRatio;
     
     // Reverse implied odds: bet / (future losses + pot + bet)
-    const reverseImpliedOdds = bet / (futureLose + pot + bet);
+    // This is the ratio of what you can lose vs what you can win
+    const reverseImpliedOddsRatio = (futureLose + pot + bet) > 0 ? bet / (futureLose + pot + bet) : 0;
+    const reverseImpliedOdds = reverseImpliedOddsRatio;
+
+    // === CAP EV VALUES TO REALISTIC RANGES ===
+    // EV should not exceed pot size * 2 or be less than -pot size
+    const cappedFoldEV = Math.max(-pot, Math.min(pot * 2, foldEV));
+    const cappedCallEV = Math.max(-pot, Math.min(pot * 2, callEV));
+    const cappedRaiseEV = Math.max(-pot, Math.min(pot * 2, raiseEV));
 
     // Determine best action
     let bestAction: 'FOLD' | 'CALL' | 'RAISE' = 'FOLD';
-    let maxEV = foldEV;
+    let maxEV = cappedFoldEV;
     
-    if (callEV > maxEV) {
-      maxEV = callEV;
+    if (cappedCallEV > maxEV) {
+      maxEV = cappedCallEV;
       bestAction = 'CALL';
     }
-    if (raiseEV > maxEV) {
-      maxEV = raiseEV;
+    if (cappedRaiseEV > maxEV) {
+      maxEV = cappedRaiseEV;
       bestAction = 'RAISE';
     }
 
     // Generate explanation
     let explanation = '';
     if (bestAction === 'FOLD') {
-      explanation = `With ${equity}% equity, your call EV is ${callEV.toFixed(2)} BB which is negative. You need at least ${breakeven.toFixed(1)}% equity to break even on this call.`;
+      explanation = `With ${(eq * 100).toFixed(1)}% equity, your call EV is ${cappedCallEV.toFixed(2)} BB which is negative. You need at least ${breakeven.toFixed(1)}% equity to break even on this call.`;
     } else if (bestAction === 'CALL') {
-      explanation = `With ${equity}% equity, calling is profitable. You gain ${callEV.toFixed(2)} BB on average. Your pot odds are ${(potOdds * 100).toFixed(1)}:1, and you have enough equity to call.`;
+      explanation = `With ${(eq * 100).toFixed(1)}% equity, calling is profitable. You gain ${cappedCallEV.toFixed(2)} BB on average. Your pot odds are ${potOddsPercent.toFixed(1)}%, and you have enough equity to call.`;
     } else {
-      explanation = `With ${foldEquity}% fold equity and ${equity}% equity when called, raising maximizes EV at ${raiseEV.toFixed(2)} BB. This is better than calling (${callEV.toFixed(2)} BB).`;
+      explanation = `With ${(foldEq * 100).toFixed(1)}% fold equity and ${(eq * 100).toFixed(1)}% equity when called, raising maximizes EV at ${cappedRaiseEV.toFixed(2)} BB. This is better than calling (${cappedCallEV.toFixed(2)} BB).`;
     }
 
     setResult({
-      foldEV,
-      callEV,
-      raiseEV,
+      foldEV: cappedFoldEV,
+      callEV: cappedCallEV,
+      raiseEV: cappedRaiseEV,
       bestAction,
       explanation,
-      potOdds: potOdds * 100,
+      potOdds: potOddsPercent,
       breakeven,
       impliedOdds,
       reverseImpliedOdds
@@ -146,8 +192,14 @@ export default function EVCalculator() {
                   value={potSize}
                   onChange={(e) => setPotSize(e.target.value)}
                   placeholder="100"
-                  className="text-lg"
+                  className={`text-lg ${errors.potSize ? 'border-red-500' : ''}`}
                 />
+                {errors.potSize && (
+                  <p className="text-xs text-red-500 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {errors.potSize}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="betToCall">Bet to Call (BB)</Label>
@@ -157,8 +209,14 @@ export default function EVCalculator() {
                   value={betToCall}
                   onChange={(e) => setBetToCall(e.target.value)}
                   placeholder="50"
-                  className="text-lg"
+                  className={`text-lg ${errors.betToCall ? 'border-red-500' : ''}`}
                 />
+                {errors.betToCall && (
+                  <p className="text-xs text-red-500 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {errors.betToCall}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -172,9 +230,16 @@ export default function EVCalculator() {
                 value={equity}
                 onChange={(e) => setEquity(e.target.value)}
                 placeholder="35"
-                className="text-lg"
+                className={`text-lg ${errors.equity ? 'border-red-500' : ''}`}
               />
-              <p className="text-xs text-gray-500">Estimated hand equity against opponent's range</p>
+              {errors.equity ? (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.equity}
+                </p>
+              ) : (
+                <p className="text-xs text-gray-500">Estimated hand equity against opponent's range (0-100%)</p>
+              )}
             </div>
 
             <div className="border-t pt-4">
@@ -190,6 +255,7 @@ export default function EVCalculator() {
                     placeholder="150"
                     className="text-lg"
                   />
+                  <p className="text-xs text-gray-500">How much you raise</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="foldEquity">Fold Equity (%)</Label>
@@ -201,8 +267,16 @@ export default function EVCalculator() {
                     value={foldEquity}
                     onChange={(e) => setFoldEquity(e.target.value)}
                     placeholder="30"
-                    className="text-lg"
+                    className={`text-lg ${errors.foldEquity ? 'border-red-500' : ''}`}
                   />
+                  {errors.foldEquity ? (
+                    <p className="text-xs text-red-500 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.foldEquity}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-500">Probability opponent folds (0-100%)</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -295,11 +369,7 @@ export default function EVCalculator() {
           {/* Call */}
           <div className={`flex items-center justify-between p-3 rounded-lg transition-all ${result.bestAction === 'CALL' ? 'bg-green-50 border-2 border-green-500' : 'bg-gray-50 border border-gray-200'}`}>
             <div className="flex items-center gap-2">
-              {result.callEV >= 0 ? (
-                <TrendingUp className="w-4 h-4 text-green-500" />
-              ) : (
-                <TrendingDown className="w-4 h-4 text-red-500" />
-              )}
+              <TrendingUp className={`w-4 h-4 ${result.callEV >= 0 ? 'text-green-600' : 'text-red-600'}`} />
               <span className="font-medium text-sm">CALL</span>
             </div>
             <div className="text-right">
@@ -315,11 +385,7 @@ export default function EVCalculator() {
           {/* Raise */}
           <div className={`flex items-center justify-between p-3 rounded-lg transition-all ${result.bestAction === 'RAISE' ? 'bg-purple-50 border-2 border-purple-500' : 'bg-gray-50 border border-gray-200'}`}>
             <div className="flex items-center gap-2">
-              {result.raiseEV >= 0 ? (
-                <TrendingUp className="w-4 h-4 text-purple-500" />
-              ) : (
-                <TrendingDown className="w-4 h-4 text-red-500" />
-              )}
+              <TrendingUp className={`w-4 h-4 ${result.raiseEV >= 0 ? 'text-purple-600' : 'text-red-600'}`} />
               <span className="font-medium text-sm">RAISE</span>
             </div>
             <div className="text-right">
@@ -342,14 +408,14 @@ export default function EVCalculator() {
         <CardContent className="space-y-3">
           <div className="flex justify-between items-center py-2 border-b">
             <span className="text-sm text-gray-600">Pot Odds</span>
-            <span className="font-semibold">{result.potOdds.toFixed(1)}:1</span>
+            <span className="font-semibold">{result.potOdds.toFixed(1)}%</span>
           </div>
           <div className="flex justify-between items-center py-2 border-b">
             <span className="text-sm text-gray-600">Breakeven Equity</span>
             <span className="font-semibold">{result.breakeven.toFixed(1)}%</span>
           </div>
           <div className="flex justify-between items-center py-2 border-b">
-            <span className="text-sm text-gray-600">Implied Odds</span>
+            <span className="text-sm text-gray-600">Implied Odds Ratio</span>
             <span className="font-semibold">{result.impliedOdds.toFixed(2)}:1</span>
           </div>
           <div className="flex justify-between items-center py-2">
@@ -359,11 +425,11 @@ export default function EVCalculator() {
         </CardContent>
       </Card>
 
-      {/* Explanation (Collapsible) */}
+      {/* Explanation */}
       <details className="group">
-        <summary className="flex items-center gap-2 cursor-pointer p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+        <summary className="flex items-center gap-2 cursor-pointer p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
           <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
-          <span className="font-medium text-sm">Why this action?</span>
+          <span className="font-medium text-sm">Why this recommendation?</span>
         </summary>
         <div className="mt-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
           <p className="text-sm text-gray-700">{result.explanation}</p>
@@ -373,7 +439,7 @@ export default function EVCalculator() {
   ) : (
     <Card className="bg-gray-50 border-dashed">
       <CardContent className="pt-12 pb-12 text-center">
-        <p className="text-gray-500">Enter parameters to see real-time analysis</p>
+        <p className="text-gray-500">Enter valid parameters to see EV analysis</p>
       </CardContent>
     </Card>
   );
@@ -381,7 +447,7 @@ export default function EVCalculator() {
   return (
     <ToolLayout
       title="EV Calculator"
-      description="Real-time expected value analysis for poker decisions"
+      description="Calculate expected value for poker decisions with instant feedback"
       inputPanel={inputPanel}
       resultPanel={resultPanel}
       showStickyResult={true}

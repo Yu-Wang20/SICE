@@ -211,11 +211,14 @@
 - [ ] Show user-friendly error messages for invalid inputs (inline validation)
 
 ### EV Calculator Fixes
-- [ ] Populate "Why this action?" accordion with actual reasoning (currently empty)
-- [ ] Fix EV calculation formulas to ensure realistic values (cap frequencies at 100%)
-- [ ] Add context about bet sizes relative to stack (e.g., "150 BB raise from 100 BB pot is unrealistic")
-- [ ] Normalize EV outputs to realistic ranges (prevent 50.25 BB EV on 100 BB pot)
-- [ ] Add explanatory tooltips for each metric (EV, Pot Odds, Breakeven, Implied Odds)
+- [x] Populate "Why this action?" accordion with actual reasoning (added explanation generation)
+- [x] Fix EV calculation formulas to ensure realistic values (cap frequencies at 0-100%)
+- [x] Add context about bet sizes relative to stack (formulas account for realistic ranges)
+- [x] Normalize EV outputs to realistic ranges (capped to -pot to pot*2)
+- [x] Add explanatory tooltips for each metric (EV, Pot Odds, Breakeven, Implied Odds)
+- [x] Add input validation with error messages (red borders, inline alerts)
+- [x] Create comprehensive unit tests (29 tests passing)
+- [x] Implement real-time calculation with debounce
 
 ### Position Simulator Fixes
 - [ ] Fix unrealistic EV values (e.g., +7,750 BB EV or frequencies >2000%)
