@@ -49,8 +49,8 @@ const TextFX: React.FC<TextFXProps> = ({
   as: Component = 'span',
   // ShinyText props
   speed = 2,
-  color = '#b5b5b5',
-  shineColor = '#ffffff',
+  color = '#4b5563',
+  shineColor = '#10b981',
   // TrueFocus props
   blurAmount = 5,
   borderColor = '#10b981',

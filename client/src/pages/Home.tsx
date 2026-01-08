@@ -278,7 +278,7 @@ export default function Home() {
                 </div>
                 <div className="hidden md:block w-32 h-32 flex-shrink-0">
                   <img 
-                    src="/illustrations/thinking.svg" 
+                    src="/illustrations/thinking-person.png" 
                     alt="Thinking illustration" 
                     className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity"
                   />
@@ -300,7 +300,7 @@ export default function Home() {
                 </div>
                 <div className="hidden md:block w-32 h-32 flex-shrink-0">
                   <img 
-                    src="/illustrations/dancing.svg" 
+                    src="/illustrations/two-people-playing.png" 
                     alt="Interaction illustration" 
                     className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity"
                   />
@@ -322,7 +322,7 @@ export default function Home() {
                 </div>
                 <div className="hidden md:block w-32 h-32 flex-shrink-0">
                   <img 
-                    src="/illustrations/selfie.svg" 
+                    src="/illustrations/human-ai-collab.png" 
                     alt="Technology illustration" 
                     className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity"
                   />
@@ -344,7 +344,7 @@ export default function Home() {
                 </div>
                 <div className="hidden md:block w-32 h-32 flex-shrink-0">
                   <img 
-                    src="/illustrations/reading.svg" 
+                    src="/illustrations/data-analysis.png" 
                     alt="Reading illustration" 
                     className="w-full h-full object-contain opacity-80 group-hover:opacity-100 transition-opacity"
                   />
