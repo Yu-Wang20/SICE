@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Trophy, Clock, CheckCircle, XCircle, Brain, Zap, BarChart3 } from "lucide-react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import Navigation from "@/components/Navigation";
 
 type QuizDifficulty = 'easy' | 'medium' | 'hard';
 type QuizCategory = 'preflop' | 'postflop' | '3bet' | 'icm' | 'odds' | 'position';
@@ -87,24 +88,34 @@ export default function QuizMode() {
 
   if (!quizStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 p-6">
-        <div className="max-w-4xl mx-auto">
-          <Button
-            variant="ghost"
-            className="mb-8"
-            onClick={() => navigate('/tools')}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Tools
-          </Button>
-
-          <div className="space-y-8">
-            <div>
-              <h1 className="text-5xl font-bold mb-4">Decision Training</h1>
-              <p className="text-xl text-gray-600">
-                Master poker strategy with {stats?.totalQuestions || 22} scenarios covering preflop, postflop, ICM, and more.
-              </p>
+      <div className="min-h-screen bg-white">
+        <Navigation />
+        <div className="md:ml-64 pt-16">
+          {/* Header with Illustration */}
+          <div className="bg-gradient-to-r from-red-50 to-orange-50 border-b">
+            <div className="max-w-4xl mx-auto px-6 py-8">
+              <div className="flex items-center justify-between gap-6">
+                <div className="flex-1">
+                  <span className="inline-block text-xs font-mono px-2 py-1 rounded mb-3 bg-red-100 text-red-700">
+                    GTO + Exploitative Play
+                  </span>
+                  <h1 className="text-4xl font-bold mb-4">Decision Training</h1>
+                  <p className="text-xl text-gray-600">
+                    Master poker strategy with {stats?.totalQuestions || 22} scenarios covering preflop, postflop, ICM, and more.
+                  </p>
+                </div>
+                <div className="hidden md:block flex-shrink-0 w-32 h-32 lg:w-40 lg:h-40">
+                  <img 
+                    src="/illustrations/selfie.svg" 
+                    alt="Training illustration"
+                    className="w-full h-full object-contain opacity-80"
+                  />
+                </div>
+              </div>
             </div>
+          </div>
+
+          <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
 
             {/* Stats Overview */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

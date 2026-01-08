@@ -461,3 +461,27 @@
 - [ ] Apply to Atlas pillar pages
 - [ ] Ensure large whitespace and visual balance
 - [ ] Test responsive layout with illustrations
+
+
+## P5 Open Doodles for Tools Pages
+
+- [ ] Download additional Open Doodles illustrations for each tool
+- [ ] Add illustration to Tools landing page header
+- [ ] Add illustration to EV Calculator header
+- [ ] Add illustration to Position Simulator header
+- [ ] Add illustration to Strategy Library header
+- [ ] Add illustration to Hand Strength header
+- [ ] Add illustration to Pot Odds header
+- [ ] Add illustration to Push/Fold Trainer header
+- [ ] Add illustration to Quiz/Decision Training header
+- [ ] Add illustration to Spot Analyzer header
+- [ ] Ensure consistent styling across all tool pages
+
+
+## P5 Open Doodles for Tools Pages - COMPLETED
+
+- [x] Download more Open Doodles illustrations for tools (meditating, dancing, groovy, selfie, etc.)
+- [x] Update ToolsHub page with illustrations (groovy.svg header + 8 tool cards with unique illustrations)
+- [x] Update individual tool headers with illustrations (SpotAnalyzer, EVCalculator, QuizMode)
+- [x] Update ToolLayout component to support illustrations, accentColor, and theory badge
+- [x] Test and deliver updated version

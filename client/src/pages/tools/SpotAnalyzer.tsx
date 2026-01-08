@@ -386,6 +386,9 @@ export default function SpotAnalyzer() {
       inputPanel={inputPanel}
       resultPanel={resultPanel}
       showStickyResult={true}
+      illustration="/illustrations/thinking.svg"
+      accentColor="emerald"
+      theory="GTO + AI Analysis"
     />
   );
 }

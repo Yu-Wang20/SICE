@@ -452,6 +452,9 @@ export default function EVCalculator() {
       inputPanel={inputPanel}
       resultPanel={resultPanel}
       showStickyResult={true}
+      illustration="/illustrations/groovy.svg"
+      accentColor="yellow"
+      theory="Expected Value Theory"
     />
   );
 }
