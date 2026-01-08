@@ -14,6 +14,14 @@ import {
   calculatePotOdds,
   getPushFoldRecommendation,
 } from "./db";
+import {
+  QUIZ_QUESTIONS,
+  getRandomQuestions,
+  getQuestionsByCategory,
+  getQuestionsByDifficulty,
+  type QuizDifficulty,
+  type QuizCategory,
+} from "./quiz-questions";
 
 export const appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -141,6 +149,76 @@ export const appRouter = router({
             positionAdvantage: isIP ? 'You have position advantage' : 'Opponent has position advantage',
           };
         }),
+    }),
+  }),
+
+  // Quiz Training System
+  quiz: router({
+    // Get all questions
+    getAllQuestions: publicProcedure.query(() => {
+      return QUIZ_QUESTIONS;
+    }),
+
+    // Get random questions with optional difficulty filter
+    getRandomQuestions: publicProcedure
+      .input(z.object({
+        count: z.number().min(1).max(22).default(6),
+        difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
+      }))
+      .query(({ input }) => {
+        return getRandomQuestions(input.count, input.difficulty as QuizDifficulty | undefined);
+      }),
+
+    // Get questions by category
+    getByCategory: publicProcedure
+      .input(z.object({
+        category: z.enum(['preflop', 'postflop', '3bet', 'icm', 'odds', 'position']),
+      }))
+      .query(({ input }) => {
+        return getQuestionsByCategory(input.category as QuizCategory);
+      }),
+
+    // Get questions by difficulty
+    getByDifficulty: publicProcedure
+      .input(z.object({
+        difficulty: z.enum(['easy', 'medium', 'hard']),
+      }))
+      .query(({ input }) => {
+        return getQuestionsByDifficulty(input.difficulty as QuizDifficulty);
+      }),
+
+    // Get single question by ID
+    getById: publicProcedure
+      .input(z.object({
+        id: z.number().min(1).max(22),
+      }))
+      .query(({ input }) => {
+        return QUIZ_QUESTIONS.find(q => q.id === input.id);
+      }),
+
+    // Get statistics about quiz
+    getStats: publicProcedure.query(() => {
+      const categories = ['preflop', 'postflop', '3bet', 'icm', 'odds', 'position'];
+      const difficulties = ['easy', 'medium', 'hard'];
+      
+      return {
+        totalQuestions: QUIZ_QUESTIONS.length,
+        byCategory: Object.fromEntries(
+          categories.map(cat => [
+            cat,
+            QUIZ_QUESTIONS.filter(q => q.category === cat).length
+          ])
+        ),
+        byDifficulty: Object.fromEntries(
+          difficulties.map(diff => [
+            diff,
+            QUIZ_QUESTIONS.filter(q => q.difficulty === diff).length
+          ])
+        ),
+        averageReadTime: Math.round(
+          QUIZ_QUESTIONS.reduce((sum, q) => sum + q.readTime, 0) / QUIZ_QUESTIONS.length
+        ),
+      };
     }),
   }),
 

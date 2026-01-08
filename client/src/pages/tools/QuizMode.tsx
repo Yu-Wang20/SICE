@@ -1,359 +1,428 @@
 /**
  * Quiz Mode - Decision Training with Instant Feedback
- * Inspired by Poker Trainer and GTO Wizard Battle+
+ * Now with 22 questions covering Preflop, Postflop, 3-bet, ICM, Odds, Position
  */
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Trophy, Clock, CheckCircle, XCircle, Brain, Zap } from "lucide-react";
+import { ArrowLeft, Trophy, Clock, CheckCircle, XCircle, Brain, Zap, BarChart3 } from "lucide-react";
 import { useLocation } from "wouter";
+import { trpc } from "@/lib/trpc";
+
+type QuizDifficulty = 'easy' | 'medium' | 'hard';
+type QuizCategory = 'preflop' | 'postflop' | '3bet' | 'icm' | 'odds' | 'position';
 
 interface QuizQuestion {
   id: number;
+  category: QuizCategory;
+  difficulty: QuizDifficulty;
   scenario: string;
-  hand: string;
   position: string;
-  villainAction: string;
-  potSize: number;
-  betSize: number;
-  options: { action: string; isCorrect: boolean; explanation: string }[];
-  difficulty: 'easy' | 'medium' | 'hard';
+  stackBB: number;
+  action: string;
+  options: Array<{
+    text: string;
+    isCorrect: boolean;
+    explanation: string;
+  }>;
   concept: string;
+  readTime: number;
 }
-
-const QUIZ_QUESTIONS: QuizQuestion[] = [
-  {
-    id: 1,
-    scenario: "UTG opens 2.5BB, folds to you in BB",
-    hand: "A♠5♠",
-    position: "BB",
-    villainAction: "UTG Open 2.5BB",
-    potSize: 3.5,
-    betSize: 2.5,
-    options: [
-      { action: "FOLD", isCorrect: false, explanation: "A5s has enough equity and playability to defend. Folding is too tight." },
-      { action: "CALL", isCorrect: true, explanation: "Correct! A5s is a standard defend from BB vs UTG open. Good equity with nut potential." },
-      { action: "3-BET to 9BB", isCorrect: false, explanation: "A5s can be a 3-bet bluff sometimes, but calling is higher EV vs tight UTG range." }
-    ],
-    difficulty: 'easy',
-    concept: "Preflop Defense"
-  },
-  {
-    id: 2,
-    scenario: "You open BTN 2.5BB, BB 3-bets to 9BB",
-    hand: "K♠Q♠",
-    position: "BTN",
-    villainAction: "BB 3-bet 9BB",
-    potSize: 11.5,
-    betSize: 6.5,
-    options: [
-      { action: "FOLD", isCorrect: false, explanation: "KQs is too strong to fold vs BB 3-bet. You have position and good equity." },
-      { action: "CALL", isCorrect: true, explanation: "Correct! KQs is a standard call in position. You have good playability postflop." },
-      { action: "4-BET to 22BB", isCorrect: false, explanation: "KQs is not strong enough to 4-bet for value. Calling keeps their bluffs in." }
-    ],
-    difficulty: 'medium',
-    concept: "3-Bet Pots"
-  },
-  {
-    id: 3,
-    scenario: "Flop: K♥7♦2♣. You c-bet 1/3 pot, villain raises 3x",
-    hand: "A♠A♥",
-    position: "IP",
-    villainAction: "Check-raise 3x",
-    potSize: 24,
-    betSize: 12,
-    options: [
-      { action: "FOLD", isCorrect: false, explanation: "AA is way too strong to fold on this dry board. Villain has many bluffs." },
-      { action: "CALL", isCorrect: true, explanation: "Correct! Call and re-evaluate turn. AA beats most of villain's value range." },
-      { action: "RE-RAISE All-in", isCorrect: false, explanation: "Shoving folds out bluffs and only gets called by sets/two pair. Calling is better." }
-    ],
-    difficulty: 'medium',
-    concept: "Facing Aggression"
-  },
-  {
-    id: 4,
-    scenario: "River: K♥7♦2♣4♠9♥. Pot is 45BB. Villain bets 35BB",
-    hand: "K♠Q♠",
-    position: "IP",
-    villainAction: "River overbet 78% pot",
-    potSize: 80,
-    betSize: 35,
-    options: [
-      { action: "FOLD", isCorrect: false, explanation: "Top pair good kicker is too strong to fold. Villain can have missed draws." },
-      { action: "CALL", isCorrect: true, explanation: "Correct! KQ is a mandatory call. You beat KJ, KT, and all bluffs." },
-      { action: "RAISE to 90BB", isCorrect: false, explanation: "Raising turns your hand into a bluff. KQ is a pure call on this runout." }
-    ],
-    difficulty: 'hard',
-    concept: "River Decisions"
-  },
-  {
-    id: 5,
-    scenario: "Tournament, 15BB effective. Folds to you in SB",
-    hand: "T♠8♠",
-    position: "SB",
-    villainAction: "BB waiting",
-    potSize: 1.5,
-    betSize: 0,
-    options: [
-      { action: "FOLD", isCorrect: false, explanation: "T8s has too much equity to fold at 15BB. You're leaving money on the table." },
-      { action: "LIMP", isCorrect: false, explanation: "Limping is exploitable and gives BB a free look. Push or fold is correct." },
-      { action: "PUSH All-in", isCorrect: true, explanation: "Correct! At 15BB, T8s is a standard push from SB. High fold equity + equity when called." }
-    ],
-    difficulty: 'medium',
-    concept: "Push/Fold"
-  },
-  {
-    id: 6,
-    scenario: "You have 8BB in CO. UTG (50BB) opens 2.5BB",
-    hand: "A♠J♥",
-    position: "CO",
-    villainAction: "UTG Open 2.5BB",
-    potSize: 4,
-    betSize: 2.5,
-    options: [
-      { action: "FOLD", isCorrect: false, explanation: "AJo is too strong to fold with 8BB. You need to accumulate chips." },
-      { action: "CALL", isCorrect: false, explanation: "Calling commits 30% of your stack with no fold equity. Shoving is better." },
-      { action: "PUSH All-in", isCorrect: true, explanation: "Correct! AJo is a premium shove over UTG open at 8BB. Good equity vs calling range." }
-    ],
-    difficulty: 'hard',
-    concept: "Short Stack Play"
-  }
-];
 
 export default function QuizMode() {
   const [, navigate] = useLocation();
-  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [showResult, setShowResult] = useState(false);
+  const [answered, setAnswered] = useState(false);
   const [score, setScore] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [quizComplete, setQuizComplete] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [timerActive, setTimerActive] = useState(true);
+  const [difficulty, setDifficulty] = useState<QuizDifficulty | 'all'>('all');
+  const [category, setCategory] = useState<QuizCategory | 'all'>('all');
+  const [quizStarted, setQuizStarted] = useState(false);
+  const [showStats, setShowStats] = useState(false);
 
-  const question = QUIZ_QUESTIONS[currentQuestion];
+  // Fetch quiz data
+  const { data: allQuestions, isLoading } = trpc.quiz.getAllQuestions.useQuery();
+  const { data: stats } = trpc.quiz.getStats.useQuery();
 
+  // Load questions based on filters
   useEffect(() => {
-    if (timerActive && timeLeft > 0 && !showResult) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && !showResult) {
-      handleAnswer(-1); // Time's up
+    if (!allQuestions) return;
+
+    let filtered = allQuestions;
+
+    // Filter by difficulty
+    if (difficulty !== 'all') {
+      filtered = filtered.filter(q => q.difficulty === difficulty);
     }
-  }, [timeLeft, timerActive, showResult]);
 
-  const handleAnswer = (optionIndex: number) => {
-    setSelectedAnswer(optionIndex);
-    setShowResult(true);
-    setTimerActive(false);
-
-    if (optionIndex >= 0 && question.options[optionIndex].isCorrect) {
-      setScore(score + (timeLeft > 20 ? 100 : timeLeft > 10 ? 75 : 50));
-      setStreak(streak + 1);
-    } else {
-      setStreak(0);
+    // Filter by category
+    if (category !== 'all') {
+      filtered = filtered.filter(q => q.category === category);
     }
-  };
 
-  const nextQuestion = () => {
-    if (currentQuestion < QUIZ_QUESTIONS.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-      setSelectedAnswer(null);
-      setShowResult(false);
-      setTimeLeft(30);
-      setTimerActive(true);
-    } else {
-      setQuizComplete(true);
-    }
-  };
-
-  const restartQuiz = () => {
-    setCurrentQuestion(0);
-    setSelectedAnswer(null);
-    setShowResult(false);
+    // Shuffle
+    const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+    setQuestions(shuffled);
+    setCurrentIndex(0);
     setScore(0);
-    setStreak(0);
-    setQuizComplete(false);
-    setTimeLeft(30);
-    setTimerActive(true);
-  };
+    setAnswered(false);
+    setSelectedAnswer(null);
+  }, [allQuestions, difficulty, category]);
 
-  if (quizComplete) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="max-w-md w-full mx-4">
-          <CardHeader className="text-center">
-            <Trophy className="w-16 h-16 mx-auto text-yellow-500 mb-4" />
-            <CardTitle className="text-3xl">Quiz Complete!</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center space-y-6">
-            <div className="text-5xl font-bold text-blue-600">{score}</div>
-            <p className="text-gray-600">points earned</p>
-            
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">
-                  {QUIZ_QUESTIONS.filter((_, i) => i <= currentQuestion).length}
+      <div className="min-h-screen bg-white p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!quizStarted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <Button
+            variant="ghost"
+            className="mb-8"
+            onClick={() => navigate('/tools')}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Tools
+          </Button>
+
+          <div className="space-y-8">
+            <div>
+              <h1 className="text-5xl font-bold mb-4">Decision Training</h1>
+              <p className="text-xl text-gray-600">
+                Master poker strategy with {stats?.totalQuestions || 22} scenarios covering preflop, postflop, ICM, and more.
+              </p>
+            </div>
+
+            {/* Stats Overview */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-emerald-600">{stats?.totalQuestions}</div>
+                    <div className="text-sm text-gray-600">Total Questions</div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-600">{stats?.byDifficulty?.easy}</div>
+                    <div className="text-sm text-gray-600">Easy</div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-orange-600">{stats?.byDifficulty?.medium}</div>
+                    <div className="text-sm text-gray-600">Medium</div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-red-600">{stats?.byDifficulty?.hard}</div>
+                    <div className="text-sm text-gray-600">Hard</div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Category Breakdown */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Questions by Category</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {Object.entries(stats?.byCategory || {}).map(([cat, count]) => (
+                    <div key={cat} className="p-3 bg-gray-50 rounded">
+                      <div className="font-semibold capitalize">{cat}</div>
+                      <div className="text-2xl font-bold text-emerald-600">{count}</div>
+                    </div>
+                  ))}
                 </div>
-                <p className="text-sm text-gray-600">Questions</p>
-              </div>
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">
-                  {Math.round(score / QUIZ_QUESTIONS.length)}
-                </div>
-                <p className="text-sm text-gray-600">Avg Score</p>
+              </CardContent>
+            </Card>
+
+            {/* Difficulty Filter */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Choose Difficulty</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {(['all', 'easy', 'medium', 'hard'] as const).map(diff => (
+                  <Button
+                    key={diff}
+                    variant={difficulty === diff ? 'default' : 'outline'}
+                    onClick={() => setDifficulty(diff)}
+                    className={difficulty === diff ? 'bg-emerald-600' : ''}
+                  >
+                    {diff === 'all' ? 'All Levels' : diff.charAt(0).toUpperCase() + diff.slice(1)}
+                  </Button>
+                ))}
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <Button onClick={restartQuiz} className="flex-1">
-                Play Again
-              </Button>
-              <Button variant="outline" onClick={() => navigate("/tools")} className="flex-1">
-                Back to Tools
-              </Button>
+            {/* Category Filter */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Choose Category</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {(['all', 'preflop', 'postflop', '3bet', 'icm', 'odds', 'position'] as const).map(cat => (
+                  <Button
+                    key={cat}
+                    variant={category === cat ? 'default' : 'outline'}
+                    onClick={() => setCategory(cat)}
+                    className={category === cat ? 'bg-emerald-600' : ''}
+                  >
+                    {cat === 'all' ? 'All' : cat === '3bet' ? '3-Bet' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </Button>
+                ))}
+              </div>
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Start Button */}
+            <Button
+              onClick={() => setQuizStarted(true)}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-6 text-lg"
+              disabled={questions.length === 0}
+            >
+              <Zap className="w-5 h-5 mr-2" />
+              Start Training ({questions.length} questions)
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-white p-6 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-gray-600">No questions found for this filter.</p>
+          <Button onClick={() => setQuizStarted(false)} className="mt-4">
+            Back to Selection
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const currentQuestion = questions[currentIndex];
+  const isComplete = currentIndex >= questions.length;
+
+  if (isComplete) {
+    const accuracy = Math.round((score / questions.length) * 100);
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-white p-6">
+        <div className="max-w-2xl mx-auto text-center space-y-8">
+          <Trophy className="w-24 h-24 mx-auto text-emerald-600" />
+          
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Quiz Complete!</h1>
+            <p className="text-gray-600">Great effort! Here's your performance breakdown.</p>
+          </div>
+
+          <Card className="border-2 border-emerald-600">
+            <CardContent className="pt-8 space-y-6">
+              <div>
+                <div className="text-6xl font-bold text-emerald-600">{accuracy}%</div>
+                <div className="text-gray-600">Accuracy</div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-emerald-50 rounded">
+                  <div className="text-3xl font-bold text-emerald-600">{score}</div>
+                  <div className="text-sm text-gray-600">Correct</div>
+                </div>
+                <div className="p-4 bg-red-50 rounded">
+                  <div className="text-3xl font-bold text-red-600">{questions.length - score}</div>
+                  <div className="text-sm text-gray-600">Incorrect</div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                <div className="text-sm text-gray-600 mb-2">Total Time</div>
+                <div className="text-2xl font-semibold">{Math.round(questions.length * 2)} min</div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-3">
+            <Button
+              onClick={() => setQuizStarted(false)}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3"
+            >
+              Try Another Quiz
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/tools')}
+              className="w-full"
+            >
+              Back to Tools
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b">
-        <div className="container py-4">
-          <Button variant="ghost" onClick={() => navigate("/tools")} className="mb-4">
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Tools
-          </Button>
+    <div className="min-h-screen bg-white p-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="mb-8 space-y-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Decision Training</h1>
-              <p className="text-gray-600">Test your poker decision-making skills</p>
+            <Button
+              variant="ghost"
+              onClick={() => setQuizStarted(false)}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <div className="text-sm font-mono text-gray-600">
+              {currentIndex + 1} / {questions.length}
             </div>
-            <div className="flex items-center gap-4">
+          </div>
+
+          <Progress value={((currentIndex + 1) / questions.length) * 100} className="h-2" />
+        </div>
+
+        {/* Question Card */}
+        <Card className="mb-8 border-2">
+          <CardHeader>
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="inline-block px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold mb-2">
+                  {currentQuestion.category.toUpperCase()} • {currentQuestion.difficulty.toUpperCase()}
+                </div>
+                <CardTitle className="text-2xl mt-2">{currentQuestion.concept}</CardTitle>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-gray-600">Read time</div>
+                <div className="flex items-center gap-1 text-emerald-600 font-semibold">
+                  <Clock className="w-4 h-4" />
+                  {currentQuestion.readTime}s
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            {/* Scenario */}
+            <div className="p-4 bg-gray-50 rounded-lg border-l-4 border-emerald-600">
+              <div className="text-sm text-gray-600 mb-2">Scenario</div>
+              <p className="text-lg">{currentQuestion.scenario}</p>
+              <div className="mt-3 text-sm text-gray-600">
+                Position: <span className="font-semibold">{currentQuestion.position}</span> | Stack: <span className="font-semibold">{currentQuestion.stackBB}BB</span>
+              </div>
+            </div>
+
+            {/* Options */}
+            <div className="space-y-3">
+              {currentQuestion.options.map((option, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    if (!answered) {
+                      setSelectedAnswer(idx);
+                      setAnswered(true);
+                      if (option.isCorrect) {
+                        setScore(score + 1);
+                      }
+                    }
+                  }}
+                  disabled={answered}
+                  className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
+                    selectedAnswer === idx
+                      ? option.isCorrect
+                        ? 'border-emerald-600 bg-emerald-50'
+                        : 'border-red-600 bg-red-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  } ${answered ? 'cursor-default' : 'cursor-pointer'}`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1">
+                      {selectedAnswer === idx ? (
+                        option.isCorrect ? (
+                          <CheckCircle className="w-5 h-5 text-emerald-600" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-600" />
+                        )
+                      ) : (
+                        <div className="w-5 h-5 rounded-full border-2 border-gray-300" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold">{option.text}</div>
+                      {selectedAnswer === idx && (
+                        <div className="text-sm text-gray-700 mt-2">{option.explanation}</div>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Next Button */}
+            {answered && (
+              <Button
+                onClick={() => {
+                  setCurrentIndex(currentIndex + 1);
+                  setSelectedAnswer(null);
+                  setAnswered(false);
+                }}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3"
+              >
+                {currentIndex + 1 === questions.length ? 'See Results' : 'Next Question'}
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Stats Bar */}
+        <div className="grid grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="pt-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{score}</div>
-                <p className="text-xs text-gray-500">Score</p>
-              </div>
-              {streak > 1 && (
-                <div className="flex items-center gap-1 bg-orange-100 px-3 py-1 rounded-full">
-                  <Zap className="w-4 h-4 text-orange-500" />
-                  <span className="font-bold text-orange-600">{streak}x</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Progress */}
-      <div className="container py-4">
-        <div className="flex items-center gap-4 mb-2">
-          <span className="text-sm text-gray-500">
-            Question {currentQuestion + 1} of {QUIZ_QUESTIONS.length}
-          </span>
-          <div className="flex-1">
-            <Progress value={(currentQuestion / QUIZ_QUESTIONS.length) * 100} />
-          </div>
-        </div>
-      </div>
-
-      {/* Question */}
-      <div className="container pb-8">
-        <div className="max-w-3xl mx-auto">
-          {/* Timer */}
-          <div className="flex items-center justify-center mb-6">
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${timeLeft <= 10 ? 'bg-red-100 text-red-600' : 'bg-gray-100'}`}>
-              <Clock className="w-4 h-4" />
-              <span className="font-mono font-bold">{timeLeft}s</span>
-            </div>
-          </div>
-
-          {/* Scenario Card */}
-          <Card className="mb-6">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <span className={`px-2 py-1 rounded text-xs font-medium ${
-                  question.difficulty === 'easy' ? 'bg-green-100 text-green-700' :
-                  question.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-red-100 text-red-700'
-                }`}>
-                  {question.difficulty.toUpperCase()}
-                </span>
-                <span className="text-sm text-gray-500">{question.concept}</span>
-              </div>
-              <CardTitle className="text-xl mt-2">{question.scenario}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-500">Your Hand</p>
-                  <p className="text-xl font-bold">{question.hand}</p>
-                </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-500">Position</p>
-                  <p className="text-xl font-bold">{question.position}</p>
-                </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-500">Pot Size</p>
-                  <p className="text-xl font-bold">{question.potSize} BB</p>
-                </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-500">To Call</p>
-                  <p className="text-xl font-bold">{question.betSize} BB</p>
-                </div>
+                <Brain className="w-5 h-5 mx-auto text-emerald-600 mb-2" />
+                <div className="text-2xl font-bold">{score}</div>
+                <div className="text-sm text-gray-600">Correct</div>
               </div>
             </CardContent>
           </Card>
-
-          {/* Options */}
-          <div className="space-y-3">
-            {question.options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => !showResult && handleAnswer(index)}
-                disabled={showResult}
-                className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                  showResult
-                    ? option.isCorrect
-                      ? 'border-green-500 bg-green-50'
-                      : selectedAnswer === index
-                        ? 'border-red-500 bg-red-50'
-                        : 'border-gray-200 bg-gray-50'
-                    : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{option.action}</span>
-                  {showResult && (
-                    option.isCorrect ? (
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                    ) : selectedAnswer === index ? (
-                      <XCircle className="w-5 h-5 text-red-500" />
-                    ) : null
-                  )}
-                </div>
-                {showResult && (
-                  <p className={`mt-2 text-sm ${option.isCorrect ? 'text-green-700' : 'text-gray-600'}`}>
-                    {option.explanation}
-                  </p>
-                )}
-              </button>
-            ))}
-          </div>
-
-          {/* Next Button */}
-          {showResult && (
-            <div className="mt-6 text-center">
-              <Button onClick={nextQuestion} size="lg">
-                {currentQuestion < QUIZ_QUESTIONS.length - 1 ? 'Next Question' : 'See Results'}
-              </Button>
-            </div>
-          )}
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <BarChart3 className="w-5 h-5 mx-auto text-blue-600 mb-2" />
+                <div className="text-2xl font-bold">{Math.round((score / (currentIndex + 1)) * 100)}%</div>
+                <div className="text-sm text-gray-600">Accuracy</div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <Clock className="w-5 h-5 mx-auto text-orange-600 mb-2" />
+                <div className="text-2xl font-bold">{currentIndex + 1}</div>
+                <div className="text-sm text-gray-600">Questions</div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

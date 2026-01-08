@@ -75,3 +75,11 @@
 - [ ] Expand quiz to 20+ questions
 - [ ] Add progress tracking with accuracy curves
 - [ ] Hand history upload feature
+
+## Quiz Expansion (22 Questions)
+- [x] Create expanded quiz database with 22 questions
+- [x] Add difficulty levels (Easy/Medium/Hard)
+- [x] Cover preflop, postflop, 3-bet pots, ICM, odds, position scenarios
+- [x] Update Quiz UI with difficulty selector and category filter
+- [x] Add progress tracking and accuracy statistics
+- [x] Implement tRPC quiz API routes
