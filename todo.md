@@ -28,7 +28,7 @@
 - [x] Add preprocess script documentation
 
 ## Future Enhancements
-- [ ] Real poker dataset integration (when user provides poker_dataset.csv)
+- [x] Real poker dataset integration (1,000,000 hands processed from poker_dataset.csv)
 - [ ] Interactive GTO calculator with visual range diagrams
 - [ ] Behavioral bias detector quiz
 - [ ] Historical timeline visualization
