@@ -1,17 +1,15 @@
 /**
- * EV Calculator - Expected Value Analysis Tool
- * Inspired by Preflop+ and GTO Wizard
- * Fixed: Correct EV formulas, added implied odds, reverse implied odds
+ * EV Calculator - Expected Value Analysis Tool (P0-3 & P0-4)
+ * Real-time calculation + Unified workbench layout
  */
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Calculator, TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
-import { useLocation } from "wouter";
+import { TrendingUp, TrendingDown, Minus, ChevronDown } from "lucide-react";
+import ToolLayout from "@/components/ToolLayout";
 
 interface EVResult {
   foldEV: number;
@@ -26,8 +24,6 @@ interface EVResult {
 }
 
 export default function EVCalculator() {
-  const [, navigate] = useLocation();
-  
   // Input state
   const [potSize, setPotSize] = useState<string>("100");
   const [betToCall, setBetToCall] = useState<string>("50");
@@ -38,9 +34,12 @@ export default function EVCalculator() {
   const [futureLosses, setFutureLosses] = useState<string>("50");
   
   const [result, setResult] = useState<EVResult | null>(null);
-  const [activeTab, setActiveTab] = useState("basic");
+  const [isCalculating, setIsCalculating] = useState(false);
 
-  const calculateEV = () => {
+  // Real-time calculation with debounce
+  const calculateEV = useCallback(() => {
+    setIsCalculating(true);
+    
     const pot = parseFloat(potSize) || 0;
     const bet = parseFloat(betToCall) || 0;
     const eq = (parseFloat(equity) || 0) / 100;
@@ -53,7 +52,6 @@ export default function EVCalculator() {
     const foldEV = 0;
 
     // Call EV = (equity * (pot + bet)) - ((1 - equity) * bet)
-    // This represents: win the whole pot if we win, lose our bet if we lose
     const totalPot = pot + bet;
     const callEV = (eq * totalPot) - ((1 - eq) * bet);
 
@@ -108,295 +106,283 @@ export default function EVCalculator() {
       impliedOdds,
       reverseImpliedOdds
     });
-  };
+
+    setIsCalculating(false);
+  }, [potSize, betToCall, equity, raiseSize, foldEquity, futureWinnings, futureLosses]);
+
+  // Auto-calculate on input change (with debounce)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      calculateEV();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [calculateEV]);
+
+  // Input Panel
+  const inputPanel = (
+    <Card>
+      <CardHeader>
+        <CardTitle>Scenario Parameters</CardTitle>
+        <CardDescription>
+          Adjust values to see results update instantly
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <Tabs defaultValue="basic" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="basic">Basic</TabsTrigger>
+            <TabsTrigger value="advanced">Advanced</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="basic" className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="potSize">Pot Size (BB)</Label>
+                <Input
+                  id="potSize"
+                  type="number"
+                  value={potSize}
+                  onChange={(e) => setPotSize(e.target.value)}
+                  placeholder="100"
+                  className="text-lg"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="betToCall">Bet to Call (BB)</Label>
+                <Input
+                  id="betToCall"
+                  type="number"
+                  value={betToCall}
+                  onChange={(e) => setBetToCall(e.target.value)}
+                  placeholder="50"
+                  className="text-lg"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="equity">Your Equity vs Villain (%)</Label>
+              <Input
+                id="equity"
+                type="number"
+                min="0"
+                max="100"
+                value={equity}
+                onChange={(e) => setEquity(e.target.value)}
+                placeholder="35"
+                className="text-lg"
+              />
+              <p className="text-xs text-gray-500">Estimated hand equity against opponent's range</p>
+            </div>
+
+            <div className="border-t pt-4">
+              <h4 className="font-medium mb-3">Raise Parameters</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="raiseSize">Raise Size (BB)</Label>
+                  <Input
+                    id="raiseSize"
+                    type="number"
+                    value={raiseSize}
+                    onChange={(e) => setRaiseSize(e.target.value)}
+                    placeholder="150"
+                    className="text-lg"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="foldEquity">Fold Equity (%)</Label>
+                  <Input
+                    id="foldEquity"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={foldEquity}
+                    onChange={(e) => setFoldEquity(e.target.value)}
+                    placeholder="30"
+                    className="text-lg"
+                  />
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="advanced" className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="futureWinnings">Future Winnings (BB)</Label>
+              <Input
+                id="futureWinnings"
+                type="number"
+                value={futureWinnings}
+                onChange={(e) => setFutureWinnings(e.target.value)}
+                placeholder="100"
+                className="text-lg"
+              />
+              <p className="text-xs text-gray-500">Additional chips you expect to win if you hit</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="futureLosses">Future Losses (BB)</Label>
+              <Input
+                id="futureLosses"
+                type="number"
+                value={futureLosses}
+                onChange={(e) => setFutureLosses(e.target.value)}
+                placeholder="50"
+                className="text-lg"
+              />
+              <p className="text-xs text-gray-500">Additional chips you expect to lose if you miss</p>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Status indicator */}
+        <div className="text-xs text-gray-500 flex items-center gap-1">
+          {isCalculating && (
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          )}
+          {isCalculating ? "Calculating..." : "Live calculation"}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Result Panel
+  const resultPanel = result ? (
+    <>
+      {/* Recommended Action - Huge */}
+      <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-2">RECOMMENDED ACTION</p>
+            <div className={`text-5xl font-bold mb-2 ${
+              result.bestAction === 'FOLD' ? 'text-gray-700' :
+              result.bestAction === 'CALL' ? 'text-green-600' :
+              'text-purple-600'
+            }`}>
+              {result.bestAction}
+            </div>
+            <p className="text-sm text-gray-600">
+              {result.bestAction === 'FOLD' && 'Fold to preserve chips'}
+              {result.bestAction === 'CALL' && 'Call for value'}
+              {result.bestAction === 'RAISE' && 'Raise to maximize EV'}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* EV Comparison */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">EV Analysis</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {/* Fold */}
+          <div className={`flex items-center justify-between p-3 rounded-lg transition-all ${result.bestAction === 'FOLD' ? 'bg-blue-50 border-2 border-blue-500' : 'bg-gray-50 border border-gray-200'}`}>
+            <div className="flex items-center gap-2">
+              <Minus className="w-4 h-4 text-gray-500" />
+              <span className="font-medium text-sm">FOLD</span>
+            </div>
+            <div className="text-right">
+              <div className="text-xl font-bold">{result.foldEV.toFixed(2)} BB</div>
+              {result.bestAction === 'FOLD' && (
+                <span className="text-xs text-blue-600 font-medium">✓ BEST</span>
+              )}
+            </div>
+          </div>
+
+          {/* Call */}
+          <div className={`flex items-center justify-between p-3 rounded-lg transition-all ${result.bestAction === 'CALL' ? 'bg-green-50 border-2 border-green-500' : 'bg-gray-50 border border-gray-200'}`}>
+            <div className="flex items-center gap-2">
+              {result.callEV >= 0 ? (
+                <TrendingUp className="w-4 h-4 text-green-500" />
+              ) : (
+                <TrendingDown className="w-4 h-4 text-red-500" />
+              )}
+              <span className="font-medium text-sm">CALL</span>
+            </div>
+            <div className="text-right">
+              <div className={`text-xl font-bold ${result.callEV >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {result.callEV >= 0 ? '+' : ''}{result.callEV.toFixed(2)} BB
+              </div>
+              {result.bestAction === 'CALL' && (
+                <span className="text-xs text-green-600 font-medium">✓ BEST</span>
+              )}
+            </div>
+          </div>
+
+          {/* Raise */}
+          <div className={`flex items-center justify-between p-3 rounded-lg transition-all ${result.bestAction === 'RAISE' ? 'bg-purple-50 border-2 border-purple-500' : 'bg-gray-50 border border-gray-200'}`}>
+            <div className="flex items-center gap-2">
+              {result.raiseEV >= 0 ? (
+                <TrendingUp className="w-4 h-4 text-purple-500" />
+              ) : (
+                <TrendingDown className="w-4 h-4 text-red-500" />
+              )}
+              <span className="font-medium text-sm">RAISE</span>
+            </div>
+            <div className="text-right">
+              <div className={`text-xl font-bold ${result.raiseEV >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
+                {result.raiseEV >= 0 ? '+' : ''}{result.raiseEV.toFixed(2)} BB
+              </div>
+              {result.bestAction === 'RAISE' && (
+                <span className="text-xs text-purple-600 font-medium">✓ BEST</span>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Key Metrics */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Key Metrics</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex justify-between items-center py-2 border-b">
+            <span className="text-sm text-gray-600">Pot Odds</span>
+            <span className="font-semibold">{result.potOdds.toFixed(1)}:1</span>
+          </div>
+          <div className="flex justify-between items-center py-2 border-b">
+            <span className="text-sm text-gray-600">Breakeven Equity</span>
+            <span className="font-semibold">{result.breakeven.toFixed(1)}%</span>
+          </div>
+          <div className="flex justify-between items-center py-2 border-b">
+            <span className="text-sm text-gray-600">Implied Odds</span>
+            <span className="font-semibold">{result.impliedOdds.toFixed(2)}:1</span>
+          </div>
+          <div className="flex justify-between items-center py-2">
+            <span className="text-sm text-gray-600">Reverse Implied Odds</span>
+            <span className="font-semibold">{result.reverseImpliedOdds.toFixed(2)}:1</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Explanation (Collapsible) */}
+      <details className="group">
+        <summary className="flex items-center gap-2 cursor-pointer p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+          <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
+          <span className="font-medium text-sm">Why this action?</span>
+        </summary>
+        <div className="mt-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <p className="text-sm text-gray-700">{result.explanation}</p>
+        </div>
+      </details>
+    </>
+  ) : (
+    <Card className="bg-gray-50 border-dashed">
+      <CardContent className="pt-12 pb-12 text-center">
+        <p className="text-gray-500">Enter parameters to see real-time analysis</p>
+      </CardContent>
+    </Card>
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-40">
-        <div className="container py-4">
-          <Button variant="ghost" onClick={() => navigate("/tools")} className="mb-4">
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Tools
-          </Button>
-          <h1 className="text-4xl font-bold">EV Calculator</h1>
-          <p className="text-gray-600 mt-2">Calculate expected value, pot odds, and implied odds for poker decisions</p>
-        </div>
-      </div>
-
-      <div className="container py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Input Panel */}
-          <Card className="h-fit">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calculator className="w-5 h-5" />
-                Scenario Parameters
-              </CardTitle>
-              <CardDescription>
-                Enter the current situation to calculate EV
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Tabs defaultValue="basic" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="basic">Basic</TabsTrigger>
-                  <TabsTrigger value="advanced">Advanced</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="basic" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="potSize">Pot Size (BB)</Label>
-                      <Input
-                        id="potSize"
-                        type="number"
-                        value={potSize}
-                        onChange={(e) => setPotSize(e.target.value)}
-                        placeholder="100"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="betToCall">Bet to Call (BB)</Label>
-                      <Input
-                        id="betToCall"
-                        type="number"
-                        value={betToCall}
-                        onChange={(e) => setBetToCall(e.target.value)}
-                        placeholder="50"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="equity">Your Equity vs Villain (%)</Label>
-                    <Input
-                      id="equity"
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={equity}
-                      onChange={(e) => setEquity(e.target.value)}
-                      placeholder="35"
-                    />
-                    <p className="text-xs text-gray-500">Estimated hand equity against opponent's range</p>
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <h4 className="font-medium mb-3">Raise Parameters</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="raiseSize">Raise Size (BB)</Label>
-                        <Input
-                          id="raiseSize"
-                          type="number"
-                          value={raiseSize}
-                          onChange={(e) => setRaiseSize(e.target.value)}
-                          placeholder="150"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="foldEquity">Fold Equity (%)</Label>
-                        <Input
-                          id="foldEquity"
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={foldEquity}
-                          onChange={(e) => setFoldEquity(e.target.value)}
-                          placeholder="30"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="advanced" className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="futureWinnings">Future Winnings (BB)</Label>
-                    <Input
-                      id="futureWinnings"
-                      type="number"
-                      value={futureWinnings}
-                      onChange={(e) => setFutureWinnings(e.target.value)}
-                      placeholder="100"
-                    />
-                    <p className="text-xs text-gray-500">Additional chips you expect to win if you hit</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="futureLosses">Future Losses (BB)</Label>
-                    <Input
-                      id="futureLosses"
-                      type="number"
-                      value={futureLosses}
-                      onChange={(e) => setFutureLosses(e.target.value)}
-                      placeholder="50"
-                    />
-                    <p className="text-xs text-gray-500">Additional chips you expect to lose if you miss</p>
-                  </div>
-                </TabsContent>
-              </Tabs>
-
-              <Button onClick={calculateEV} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" size="lg">
-                Calculate EV
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Results Panel */}
-          <div className="space-y-6">
-            {result ? (
-              <>
-                {/* EV Comparison */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>EV Analysis</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {/* Fold */}
-                      <div className={`flex items-center justify-between p-4 rounded-lg transition-all ${result.bestAction === 'FOLD' ? 'bg-blue-50 border-2 border-blue-500' : 'bg-gray-50 border border-gray-200'}`}>
-                        <div className="flex items-center gap-3">
-                          <Minus className="w-5 h-5 text-gray-500" />
-                          <span className="font-medium">FOLD</span>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold">{result.foldEV.toFixed(2)} BB</div>
-                          {result.bestAction === 'FOLD' && (
-                            <span className="text-xs text-blue-600 font-medium">✓ BEST</span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Call */}
-                      <div className={`flex items-center justify-between p-4 rounded-lg transition-all ${result.bestAction === 'CALL' ? 'bg-green-50 border-2 border-green-500' : 'bg-gray-50 border border-gray-200'}`}>
-                        <div className="flex items-center gap-3">
-                          {result.callEV >= 0 ? (
-                            <TrendingUp className="w-5 h-5 text-green-500" />
-                          ) : (
-                            <TrendingDown className="w-5 h-5 text-red-500" />
-                          )}
-                          <span className="font-medium">CALL</span>
-                        </div>
-                        <div className="text-right">
-                          <div className={`text-2xl font-bold ${result.callEV >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {result.callEV >= 0 ? '+' : ''}{result.callEV.toFixed(2)} BB
-                          </div>
-                          {result.bestAction === 'CALL' && (
-                            <span className="text-xs text-green-600 font-medium">✓ BEST</span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Raise */}
-                      <div className={`flex items-center justify-between p-4 rounded-lg transition-all ${result.bestAction === 'RAISE' ? 'bg-purple-50 border-2 border-purple-500' : 'bg-gray-50 border border-gray-200'}`}>
-                        <div className="flex items-center gap-3">
-                          {result.raiseEV >= 0 ? (
-                            <TrendingUp className="w-5 h-5 text-purple-500" />
-                          ) : (
-                            <TrendingDown className="w-5 h-5 text-red-500" />
-                          )}
-                          <span className="font-medium">RAISE</span>
-                        </div>
-                        <div className="text-right">
-                          <div className={`text-2xl font-bold ${result.raiseEV >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
-                            {result.raiseEV >= 0 ? '+' : ''}{result.raiseEV.toFixed(2)} BB
-                          </div>
-                          {result.bestAction === 'RAISE' && (
-                            <span className="text-xs text-purple-600 font-medium">✓ BEST</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Odds Analysis */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Info className="w-5 h-5" />
-                      Odds & Breakeven
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-blue-50 rounded">
-                        <div className="text-sm text-gray-600">Pot Odds</div>
-                        <div className="text-2xl font-bold text-blue-600">{result.potOdds.toFixed(1)}%</div>
-                      </div>
-                      <div className="p-3 bg-emerald-50 rounded">
-                        <div className="text-sm text-gray-600">Breakeven Equity</div>
-                        <div className="text-2xl font-bold text-emerald-600">{result.breakeven.toFixed(1)}%</div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-orange-50 rounded">
-                        <div className="text-sm text-gray-600">Implied Odds</div>
-                        <div className="text-2xl font-bold text-orange-600">{result.impliedOdds.toFixed(2)}:1</div>
-                      </div>
-                      <div className="p-3 bg-red-50 rounded">
-                        <div className="text-sm text-gray-600">Reverse Implied</div>
-                        <div className="text-2xl font-bold text-red-600">{result.reverseImpliedOdds.toFixed(2)}:1</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Explanation */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Analysis</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="text-gray-700">{result.explanation}</p>
-                    
-                    <div className="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
-                      <h4 className="font-medium text-yellow-800 mb-2">💡 GTO Insight</h4>
-                      <p className="text-sm text-yellow-700">
-                        In GTO play, we mix actions to remain unexploitable. This calculator shows pure EV, 
-                        but optimal play may involve mixing frequencies based on board texture and opponent tendencies.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-            ) : (
-              <Card>
-                <CardContent className="py-12 text-center text-gray-500">
-                  <Calculator className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Enter scenario parameters and click Calculate to see EV analysis</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Formula Reference */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">EV Formulas</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm font-mono bg-gray-50 p-4 rounded">
-                <div>
-                  <span className="text-gray-600">Call EV =</span>
-                  <span className="ml-2 text-gray-800">(Equity × Total Pot) - ((1 - Equity) × Bet)</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Raise EV =</span>
-                  <span className="ml-2 text-gray-800">(Fold Eq × Pot) + ((1 - Fold Eq) × EV when called)</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Pot Odds =</span>
-                  <span className="ml-2 text-gray-800">Bet / (Pot + 2 × Bet)</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Implied Odds =</span>
-                  <span className="ml-2 text-gray-800">(Future Win + Pot + Bet) / Bet</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    </div>
+    <ToolLayout
+      title="EV Calculator"
+      description="Real-time expected value analysis for poker decisions"
+      inputPanel={inputPanel}
+      resultPanel={resultPanel}
+      showStickyResult={true}
+    />
   );
 }

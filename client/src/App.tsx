@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
 import AtlasHub from "./pages/atlas/Hub";
 import MathematicalFoundations from "./pages/atlas/MathematicalFoundations";
@@ -22,6 +23,7 @@ import EVCalculator from "./pages/tools/EVCalculator";
 import QuizMode from "./pages/tools/QuizMode";
 import StrategyLibrary from "./pages/tools/StrategyLibrary";
 import ResearchMap from "./pages/ResearchMap";
+import History from "./pages/History";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -46,6 +48,7 @@ function Router() {
       <Route path={"/tools/quiz"} component={QuizMode} />
       <Route path={"/tools/strategy-library"} component={StrategyLibrary} />
       <Route path={"/research-map"} component={ResearchMap} />
+      <Route path={"/history"} component={History} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -62,7 +65,15 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <div className="flex">
+            {/* Persistent Sidebar (P0-2) */}
+            <Sidebar />
+            
+            {/* Main Content Area */}
+            <main className="flex-1 md:ml-64">
+              <Router />
+            </main>
+          </div>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
