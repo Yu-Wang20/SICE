@@ -5,20 +5,42 @@
 
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Brain, Calculator, Target, Map, BookOpen } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [, navigate] = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white text-black">
+      {/* Sticky Navigation */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-sm shadow-md' : 'bg-transparent'}`}>
+        <div className="container flex items-center justify-between h-16">
+          <button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="font-bold text-lg">SICE</button>
+          <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+            <button onClick={() => navigate('/atlas/mathematical-foundations')} className="hover:text-blue-600 transition-colors">Math</button>
+            <button onClick={() => navigate('/atlas/game-theory-evolution')} className="hover:text-purple-600 transition-colors">Game Theory</button>
+            <button onClick={() => navigate('/atlas/ai-algorithm-analysis')} className="hover:text-orange-600 transition-colors">AI</button>
+            <button onClick={() => navigate('/atlas/decision-matrix')} className="hover:text-green-600 transition-colors">Matrix</button>
+            <button onClick={() => navigate('/tools')} className="hover:text-red-600 transition-colors">Tools</button>
+            <button onClick={() => navigate('/research-map')} className="hover:text-indigo-600 transition-colors">Research</button>
+          </div>
+        </div>
+      </nav>
       {/* Hero Section */}
       <section className="min-h-screen flex items-center border-b-8 border-black">
         <div className="container">
           <div className="max-w-5xl space-y-8">
             <div className="space-y-6">
-              <h1 className="text-7xl md:text-8xl lg:text-9xl font-bold leading-tight">
-                Strategic Intelligence Atlas
+              <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold leading-tight">
+                Strategic Intelligence Content Engine
               </h1>
             </div>
 

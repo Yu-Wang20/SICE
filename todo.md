@@ -32,3 +32,10 @@
 - [ ] Interactive GTO calculator with visual range diagrams
 - [ ] Behavioral bias detector quiz
 - [ ] Historical timeline visualization
+
+## Website Optimization (from user feedback)
+- [x] Update title to "Strategic Intelligence Content Engine"
+- [x] Add sticky navigation bar with links to pillars, Atlas, case studies
+- [ ] Improve visual hierarchy with hero banner and pillar icons
+- [ ] Add breadcrumbs for navigation
+- [ ] Enhance accessibility (semantic HTML, alt text, keyboard nav)
