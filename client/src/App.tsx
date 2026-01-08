@@ -23,6 +23,8 @@ import EVCalculator from "./pages/tools/EVCalculator";
 import QuizMode from "./pages/tools/QuizMode";
 import StrategyLibrary from "./pages/tools/StrategyLibrary";
 import SpotAnalyzer from "./pages/tools/SpotAnalyzer";
+import Trainer from "./pages/Trainer";
+import SavedSpots from "./pages/SavedSpots";
 import ResearchMap from "./pages/ResearchMap";
 import History from "./pages/History";
 
@@ -49,8 +51,12 @@ function Router() {
       <Route path={"/tools/quiz"} component={QuizMode} />
       <Route path={"/tools/strategy-library"} component={StrategyLibrary} />
       <Route path={"/tools/spot-analyzer"} component={SpotAnalyzer} />
-      <Route path={"/research-map"} component={ResearchMap} />
+      {/* Main Pages */}
+      <Route path={"/trainer"} component={Trainer} />
+      <Route path={"/saved"} component={SavedSpots} />
+      <Route path={"/saved-spots"} component={SavedSpots} />
       <Route path={"/history"} component={History} />
+      <Route path={"/research-map"} component={ResearchMap} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

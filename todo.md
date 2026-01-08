@@ -190,3 +190,82 @@
 - [ ] Add heatmap visualizations
 - [ ] Add interactive decision trees
 - [ ] Add probability distribution charts
+
+
+## P1 CRITICAL: User-Reported Bugs & UX Issues (From Detailed Debug Report)
+
+### Navigation & Routing Fixes
+- [ ] Fix dead Trainer link (/trainer → 404, should link to /tools/quiz or create dedicated Trainer page)
+- [ ] Fix dead Saved link (/saved → 404, should implement Saved Spots page)
+- [ ] Fix Saved Spots page (/saved missing, should display favorited analyses)
+- [ ] Update sidebar to link to existing quiz route (/tools/decision-training or /tools/quiz)
+- [ ] Implement Trainer index page or redirect to quiz
+- [ ] Create Saved Spots page with persistent storage
+
+### Input Validation & Data Accuracy
+- [ ] Add hand validation in Analyze a Spot (only allow valid rank+suit, e.g., AK, 77, 87s)
+- [ ] Add board validation (only valid card combinations, reject "12345" or "XYZ")
+- [ ] Restrict Fold Equity (%) to 0-100% range with error message
+- [ ] Restrict Future Winnings/Losses to reasonable ranges with validation
+- [ ] Add numeric input bounds for all percentage fields (0-100%)
+- [ ] Show user-friendly error messages for invalid inputs (inline validation)
+
+### EV Calculator Fixes
+- [ ] Populate "Why this action?" accordion with actual reasoning (currently empty)
+- [ ] Fix EV calculation formulas to ensure realistic values (cap frequencies at 100%)
+- [ ] Add context about bet sizes relative to stack (e.g., "150 BB raise from 100 BB pot is unrealistic")
+- [ ] Normalize EV outputs to realistic ranges (prevent 50.25 BB EV on 100 BB pot)
+- [ ] Add explanatory tooltips for each metric (EV, Pot Odds, Breakeven, Implied Odds)
+
+### Position Simulator Fixes
+- [ ] Fix unrealistic EV values (e.g., +7,750 BB EV or frequencies >2000%)
+- [ ] Ensure decision tree updates when Pot Size or Stack Size changes
+- [ ] Add explanation of which algorithm is used (ReBeL, DeepStack, etc.)
+- [ ] Fix IP/OOP toggle to update actual values, not just labels
+- [ ] Validate that raise sizes are realistic relative to stack depth
+
+### Strategy Library (Ranges) Fixes
+- [ ] Make range grid interactive: hover/click on hands to show combo counts and frequencies
+- [ ] Implement Export Range button (PNG, PDF, or CSV format)
+- [ ] Add stack depth selector (not just 100 BB)
+- [ ] Support 9-max games (currently only 6-max)
+- [ ] Add position filter (UTG, MP, CO, BTN, SB, BB)
+- [ ] Show success/failure message after export
+
+### Hand Strength Evolution Fixes
+- [ ] Make Hole Cards input actually filter results (currently ignored)
+- [ ] Validate hole card input format
+- [ ] Update table when hole cards change
+- [ ] Add explanation of what "strength" means (vs opponent range)
+
+### History & Saved Spots
+- [ ] Persist analyzed spots to localStorage/database (currently always shows "No history yet")
+- [ ] Auto-save spots when analysis completes
+- [ ] Display saved spots in History page with timestamps
+- [ ] Add "Clear History" button
+- [ ] Implement Saved Spots page (currently 404)
+- [ ] Add ability to re-load saved spot parameters
+
+### Decision Training / Quiz
+- [ ] Fix timer bug (always shows ~4 minutes, should show actual time)
+- [ ] Add review page showing all questions with explanations
+- [ ] Implement streak counter (consecutive correct answers)
+- [ ] Add weak-category tracking (e.g., "3-bet pots" accuracy: 60%)
+- [ ] Allow revisiting previous questions
+- [ ] Fix "Total Time" calculation in summary
+
+### UX & Documentation
+- [ ] Add help tooltips for all metrics (EV, confidence, frequency, etc.)
+- [ ] Populate empty explanations in all tools
+- [ ] Add "Why this action?" reasoning to all recommendations
+- [ ] Add table of contents to long-form content (Atlas, Research)
+- [ ] Link Atlas/Research content to relevant tools (e.g., martingales → EV Calculator)
+- [ ] Ensure responsive design on mobile (test all tools)
+- [ ] Add ARIA labels for accessibility
+- [ ] Improve color contrast for accessibility compliance
+
+### Data Normalization
+- [ ] Ensure all EV values expressed in big blinds (BB)
+- [ ] Cap all frequency percentages at 100%
+- [ ] Validate that pot odds calculations are correct
+- [ ] Ensure implied odds and reverse implied odds are realistic

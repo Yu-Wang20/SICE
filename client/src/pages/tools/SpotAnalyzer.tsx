@@ -10,9 +10,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, TrendingDown, Heart, Share2, ChevronDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Heart, Share2, ChevronDown, AlertCircle } from "lucide-react";
 import ToolLayout from "@/components/ToolLayout";
 import { useSpotHistory } from "@/hooks/useSpotHistory";
+import { validateHand, validateBoard } from "@/utils/validation";
 
 interface SpotAnalysis {
   action: 'FOLD' | 'CALL' | 'RAISE';
@@ -57,9 +58,23 @@ export default function SpotAnalyzer() {
   const [analysis, setAnalysis] = useState<SpotAnalysis | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [handError, setHandError] = useState<string>("");
+  const [boardError, setBoardError] = useState<string>("");
 
   // Real-time analysis calculation
   const analyzeSpot = useCallback(() => {
+    // Validate inputs first
+    const handValidation = validateHand(hand);
+    const boardValidation = validateBoard(board);
+
+    setHandError(handValidation.error || "");
+    setBoardError(boardValidation.error || "");
+
+    if (!handValidation.valid || !boardValidation.valid) {
+      setAnalysis(null);
+      return;
+    }
+
     setIsCalculating(true);
 
     // Simulate GTO analysis (in production, this would call backend API)
@@ -204,9 +219,16 @@ export default function SpotAnalyzer() {
               onChange={(e) => setHand(e.target.value.toUpperCase())}
               placeholder="AK, 77, etc."
               maxLength={4}
-              className="text-lg font-mono"
+              className={`text-lg font-mono ${handError ? 'border-red-500' : ''}`}
             />
-            <p className="text-xs text-gray-500">e.g., AK, QQ, 87s</p>
+            {handError ? (
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {handError}
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500">e.g., AK, QQ, 87s</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="board">Board (optional)</Label>
@@ -215,10 +237,17 @@ export default function SpotAnalyzer() {
               value={board}
               onChange={(e) => setBoard(e.target.value.toUpperCase())}
               placeholder="AK2, empty for preflop"
-              maxLength={6}
-              className="text-lg font-mono"
+              maxLength={10}
+              className={`text-lg font-mono ${boardError ? 'border-red-500' : ''}`}
             />
-            <p className="text-xs text-gray-500">Preflop if empty</p>
+            {boardError ? (
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {boardError}
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500">Preflop if empty</p>
+            )}
           </div>
         </div>
 

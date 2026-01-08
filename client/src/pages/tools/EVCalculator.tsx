@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, TrendingDown, Minus, ChevronDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, ChevronDown, AlertCircle } from "lucide-react";
 import ToolLayout from "@/components/ToolLayout";
+import { validatePercentage, validatePotSize, validateBetSize } from "@/utils/validation";
 
 interface EVResult {
   foldEV: number;
@@ -35,6 +36,7 @@ export default function EVCalculator() {
   
   const [result, setResult] = useState<EVResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Real-time calculation with debounce
   const calculateEV = useCallback(() => {
