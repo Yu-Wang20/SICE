@@ -6,7 +6,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
-import HandInput from "@/components/HandInput";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -214,11 +213,22 @@ export default function SpotAnalyzer() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="hand">Your Hand</Label>
-            <HandInput
+            <Input
+              id="hand"
               value={hand}
-              onChange={setHand}
-              error={handError}
+              onChange={(e) => setHand(e.target.value.toUpperCase())}
+              placeholder="AK, 77, etc."
+              maxLength={4}
+              className={`text-lg font-mono ${handError ? 'border-red-500' : ''}`}
             />
+            {handError ? (
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {handError}
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500">e.g., AK, QQ, 87s</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="board">Board (optional)</Label>

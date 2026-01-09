@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch, useLocation } from "wouter";
+import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Sidebar from "./components/Sidebar";
@@ -66,23 +66,6 @@ function Router() {
   );
 }
 
-function AppContent() {
-  const [location] = useLocation();
-  const isHomePage = location === "/";
-
-  return (
-    <div className="flex">
-      {/* Persistent Sidebar (P0-2) - hidden on homepage */}
-      <Sidebar />
-      
-      {/* Main Content Area - no margin on homepage */}
-      <main className={`flex-1 ${isHomePage ? '' : 'md:ml-64'}`}>
-        <Router />
-      </main>
-    </div>
-  );
-}
-
 function App() {
   return (
     <ErrorBoundary>
@@ -92,7 +75,15 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <AppContent />
+          <div className="flex">
+            {/* Persistent Sidebar (P0-2) */}
+            <Sidebar />
+            
+            {/* Main Content Area */}
+            <main className="flex-1 md:ml-64">
+              <Router />
+            </main>
+          </div>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

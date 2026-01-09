@@ -2,7 +2,6 @@
  * Persistent Sidebar Navigation (P0-2)
  * Enables one-click section switching without back buttons
  * Responsive: collapses to hamburger on mobile
- * Hidden on homepage for cleaner landing experience
  */
 
 import { useState, useEffect } from "react";
@@ -10,7 +9,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
   Menu, X, Target, Brain, Lightbulb, Wrench, History, Bookmark,
-  BookOpen, Zap, Gamepad2, Home
+  BookOpen, Zap, Gamepad2
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -25,7 +24,7 @@ const NAV_ITEMS = [
     id: "trainer",
     label: "Trainer",
     icon: Brain,
-    href: "/tools/quiz",
+    href: "/trainer",
     category: "tools"
   },
   {
@@ -89,9 +88,6 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Hide sidebar on homepage
-  const isHomePage = location === "/";
-
   // Detect mobile
   useEffect(() => {
     const handleResize = () => {
@@ -124,11 +120,6 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const personalItems = NAV_ITEMS.filter(item => item.category === "personal");
   const researchItems = NAV_ITEMS.filter(item => item.category === "research");
 
-  // Don't render sidebar on homepage
-  if (isHomePage) {
-    return null;
-  }
-
   // Mobile: show hamburger button
   if (isMobile) {
     return (
@@ -136,7 +127,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         {/* Mobile Hamburger Button */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="fixed top-4 left-4 z-40 p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 md:hidden shadow-sm"
+          className="fixed top-4 left-4 z-40 p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 md:hidden"
         >
           {mobileOpen ? (
             <X className="h-5 w-5 text-gray-700" />
@@ -165,7 +156,6 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
             researchItems={researchItems}
             isActive={isActive}
             onNavigate={handleNavigation}
-            showHomeLink={true}
           />
         </div>
       </>
@@ -181,7 +171,6 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         researchItems={researchItems}
         isActive={isActive}
         onNavigate={handleNavigation}
-        showHomeLink={true}
       />
     </aside>
   );
@@ -193,7 +182,6 @@ interface SidebarContentProps {
   researchItems: typeof NAV_ITEMS;
   isActive: (href: string) => boolean;
   onNavigate: (href: string) => void;
-  showHomeLink?: boolean;
 }
 
 function SidebarContent({
@@ -201,19 +189,13 @@ function SidebarContent({
   personalItems,
   researchItems,
   isActive,
-  onNavigate,
-  showHomeLink = false
+  onNavigate
 }: SidebarContentProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Logo / Branding */}
       <div className="p-6 border-b border-gray-200">
-        <button 
-          onClick={() => onNavigate("/")}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-        >
-          <h2 className="text-xl font-bold text-emerald-600">SICE</h2>
-        </button>
+        <h2 className="text-xl font-bold text-gray-900">SICE</h2>
         <p className="text-xs text-gray-500 mt-1">Poker Decision Engine</p>
       </div>
 
@@ -224,7 +206,7 @@ function SidebarContent({
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
             Tools
           </h3>
-          <div className="space-y-1">
+          <div className="space-y-2">
             {items.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
@@ -232,7 +214,7 @@ function SidebarContent({
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.href)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
                     active
                       ? "bg-emerald-100 text-emerald-700 font-medium"
                       : "text-gray-700 hover:bg-gray-100"
@@ -251,7 +233,7 @@ function SidebarContent({
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
             Personal
           </h3>
-          <div className="space-y-1">
+          <div className="space-y-2">
             {personalItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
@@ -259,7 +241,7 @@ function SidebarContent({
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.href)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
                     active
                       ? "bg-emerald-100 text-emerald-700 font-medium"
                       : "text-gray-700 hover:bg-gray-100"
@@ -278,7 +260,7 @@ function SidebarContent({
           <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
             Research
           </h3>
-          <div className="space-y-1">
+          <div className="space-y-2">
             {researchItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
@@ -286,7 +268,7 @@ function SidebarContent({
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.href)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
                     active
                       ? "bg-emerald-100 text-emerald-700 font-medium"
                       : "text-gray-700 hover:bg-gray-100"

@@ -1,44 +1,67 @@
 /**
- * Home Page - Bento Grid Layout with Training-First Design
- * Main focus: Get users into training immediately
+ * Home Page - OpenAI-inspired Clean Design with Animations
+ * Features: BlurText, FadeIn animations, elegant typography, generous whitespace
  */
 
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { 
-  ArrowRight, Play, Target, Crosshair, 
-  BookOpen, Layers, Zap, TrendingUp,
-  Clock, Award, BarChart3
-} from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import Navigation from "@/components/Navigation";
 import BlurText from "@/components/effects/BlurText";
 import FadeIn from "@/components/effects/FadeIn";
-import { motion } from "motion/react";
+import CountUp from "@/components/effects/CountUp";
 
-// Tool cards data
-const TOOL_CARDS = [
+// Research articles data
+const RESEARCH_ARTICLES = [
   {
-    id: "analyze",
+    id: "mathematical-foundations",
+    title: "Mathematical Foundations",
+    description: "Probability theory, martingale convergence, and stochastic calculus—the mathematical bedrock of optimal decision-making.",
+    href: "/atlas/mathematical-foundations",
+    date: "1933 - 1970s"
+  },
+  {
+    id: "game-theory-evolution",
+    title: "Game Theory & GTO",
+    description: "Nash equilibrium, Harsanyi transformation, and exploitative strategies—the science of strategic interaction.",
+    href: "/atlas/game-theory-evolution",
+    date: "1944 - 2000s"
+  },
+  {
+    id: "ai-algorithm-analysis",
+    title: "AI & Algorithms",
+    description: "AlphaZero, ReBeL, Pluribus, and the future of strategic AI—where human intuition meets machine precision.",
+    href: "/atlas/ai-algorithm-analysis",
+    date: "2017 - Present"
+  },
+  {
+    id: "decision-matrix",
+    title: "Decision Framework",
+    description: "Map your environment to the optimal algorithm for maximum edge—a practical guide to strategic thinking.",
+    href: "/atlas/decision-matrix",
+    date: "Applied Theory"
+  }
+];
+
+// Tools data
+const TOOLS = [
+  {
+    step: "Step 1",
     title: "Analyze a Spot",
-    description: "Get instant GTO recommendation for any poker situation",
-    href: "/tools/spot-analyzer",
-    icon: Crosshair,
-    color: "emerald"
+    description: "Get instant GTO recommendation for your poker situation with real-time decision support.",
+    href: "/tools/spot-analyzer"
   },
   {
-    id: "ranges",
-    title: "Ranges",
-    description: "Browse preflop ranges by position and stack depth",
-    href: "/tools/strategy-library",
-    icon: Layers,
-    color: "blue"
+    step: "Step 2",
+    title: "Train Your Instincts",
+    description: "Master decision-making with 22+ scenarios and instant feedback to build muscle memory.",
+    href: "/tools/quiz"
   },
   {
-    id: "trainer",
-    title: "Trainer",
-    description: "Practice decisions with instant feedback",
-    href: "/tools/quiz",
-    icon: Target,
-    color: "purple"
+    step: "Step 3",
+    title: "Reference Ranges",
+    description: "Browse preflop ranges by position, stack depth, and situation for GTO reference.",
+    href: "/tools/strategy-library"
   }
 ];
 
@@ -46,249 +69,224 @@ export default function Home() {
   const [, navigate] = useLocation();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Minimal Header for Home */}
-      <header className="bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="font-bold text-xl text-emerald-600">
-              SICE
-            </Link>
-            <div className="flex items-center gap-3">
-              <Link href="/atlas" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                Research
-              </Link>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => navigate("/tools")}
-                className="text-sm"
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
+      <Navigation />
+
+      {/* Hero Section - OpenAI Style */}
+      <section className="pt-32 pb-20 md:pt-44 md:pb-28">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          {/* Date/Category Tag */}
+          <FadeIn delay={0} duration={0.5}>
+            <p className="text-sm text-gray-500 mb-8 tracking-wide">
+              Poker Decision Engine
+            </p>
+          </FadeIn>
+          
+          {/* Main Title with BlurText Animation */}
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif font-normal leading-[1.1] text-gray-900 mb-10">
+            <BlurText 
+              text="Introducing SICE"
+              delay={80}
+              animateBy="words"
+              direction="top"
+              className="justify-center"
+            />
+          </h1>
+
+          {/* CTA Buttons */}
+          <FadeIn delay={0.4} duration={0.6}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={() => navigate("/tools/spot-analyzer")}
+                className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-6 text-base rounded-full transition-all hover:scale-[1.02]"
               >
-                All Tools
+                Try SICE
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/atlas")}
+                className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-6 text-base rounded-full transition-all hover:scale-[1.02]"
+              >
+                Read Research
+                <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Bento Grid */}
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Hero Section - Compact */}
-        <FadeIn delay={0} duration={0.5}>
-          <div className="text-center mb-8">
-            <p className="text-sm text-gray-500 mb-2">Poker Decision Engine</p>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-              <BlurText 
-                text="Train smarter, play better"
-                delay={50}
-                animateBy="words"
-                direction="top"
-                className="justify-center"
-              />
-            </h1>
-          </div>
-        </FadeIn>
-
-        {/* Bento Grid - First Row */}
-        <div className="grid grid-cols-12 gap-4 mb-4">
-          {/* Main Card: Today's Training */}
-          <FadeIn delay={0.1} duration={0.5} className="col-span-12 md:col-span-7">
-            <motion.div
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              className="h-full"
-            >
-              <Link href="/tools/quiz" className="block h-full">
-                <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl p-8 h-full min-h-[280px] flex flex-col justify-between text-white cursor-pointer group shadow-lg hover:shadow-xl transition-shadow">
-                  <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                        <Zap className="h-5 w-5" />
-                      </div>
-                      <span className="text-emerald-100 text-sm font-medium">Daily Training</span>
-                    </div>
-                    <h2 className="text-3xl md:text-4xl font-bold mb-3">
-                      Today's 10 Hands
-                    </h2>
-                    <p className="text-emerald-100 text-lg max-w-md">
-                      Build your poker instincts with daily decision practice. Track your progress and identify weak spots.
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-between mt-6">
-                    <div className="flex items-center gap-6 text-sm text-emerald-100">
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="h-4 w-4" />
-                        ~5 min
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Award className="h-4 w-4" />
-                        22 scenarios
-                      </span>
-                    </div>
-                    <Button 
-                      size="lg"
-                      className="bg-white text-emerald-700 hover:bg-emerald-50 font-semibold group-hover:translate-x-1 transition-transform"
-                    >
-                      Start Training
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          </FadeIn>
-
-          {/* Secondary Card: Hand Simulator */}
-          <FadeIn delay={0.2} duration={0.5} className="col-span-12 md:col-span-5">
-            <motion.div
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              className="h-full"
-            >
-              <Link href="/tools/hand-simulator" className="block h-full">
-                <div className="bg-gray-900 rounded-2xl p-8 h-full min-h-[280px] flex flex-col justify-between text-white cursor-pointer group shadow-lg hover:shadow-xl transition-shadow">
-                  <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                        <Play className="h-5 w-5" />
-                      </div>
-                      <span className="text-gray-400 text-sm font-medium">Interactive</span>
-                    </div>
-                    <h2 className="text-2xl md:text-3xl font-bold mb-3">
-                      Hand Simulator
-                    </h2>
-                    <p className="text-gray-400">
-                      Play out hands against AI opponents. See how different actions affect your EV.
-                    </p>
-                  </div>
-                  <Button 
-                    variant="outline"
-                    className="w-fit border-gray-700 text-white hover:bg-gray-800 mt-4 group-hover:border-gray-500 transition-colors"
-                  >
-                    Play a Hand
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </div>
-              </Link>
-            </motion.div>
           </FadeIn>
         </div>
+      </section>
 
-        {/* Bento Grid - Second Row: Tool Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {TOOL_CARDS.map((tool, index) => {
-            const Icon = tool.icon;
-            return (
-              <FadeIn key={tool.id} delay={0.3 + index * 0.1} duration={0.5}>
-                <motion.div
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Link href={tool.href} className="block">
-                    <div className="bg-white rounded-xl p-6 border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all cursor-pointer group h-full">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 ${
-                        tool.color === 'emerald' ? 'bg-emerald-100 text-emerald-600' :
-                        tool.color === 'blue' ? 'bg-blue-100 text-blue-600' :
-                        'bg-purple-100 text-purple-600'
-                      }`}>
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-emerald-600 transition-colors">
-                        {tool.title}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {tool.description}
-                      </p>
-                      <div className="mt-4 flex items-center text-sm text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                        Open tool <ArrowRight className="h-3.5 w-3.5 ml-1" />
-                      </div>
+      {/* Description Section */}
+      <section className="py-16 md:py-24 border-t border-gray-100">
+        <div className="max-w-3xl mx-auto px-6">
+          <FadeIn delay={0.1} duration={0.7}>
+            <div className="space-y-8">
+              <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
+                We've built a decision engine called SICE which provides instant GTO recommendations for poker situations. The system makes it possible for players to get real-time analysis, train their instincts, and reference optimal ranges.
+              </p>
+              <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
+                SICE is powered by analysis of over 1 million hands, combining probability theory, game theory, and modern AI algorithms to deliver actionable insights in under 10 seconds.
+              </p>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Three Tools Section */}
+      <section className="py-16 md:py-24 bg-gray-50">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200 rounded-2xl overflow-hidden shadow-sm">
+            {TOOLS.map((tool, index) => (
+              <FadeIn key={tool.step} delay={0.1 * index} duration={0.5}>
+                <Link href={tool.href} className="block h-full">
+                  <div className="bg-white p-8 md:p-10 hover:bg-gray-50 transition-all h-full cursor-pointer group">
+                    <div className="text-sm text-gray-400 mb-4 font-medium">{tool.step}</div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-emerald-600 transition-colors">
+                      {tool.title}
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed text-[15px]">
+                      {tool.description}
+                    </p>
+                    <div className="mt-6 flex items-center text-sm text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Get started <ArrowRight className="h-3.5 w-3.5 ml-1" />
                     </div>
-                  </Link>
-                </motion.div>
+                  </div>
+                </Link>
               </FadeIn>
-            );
-          })}
+            ))}
+          </div>
         </div>
+      </section>
 
-        {/* Stats Row */}
-        <FadeIn delay={0.6} duration={0.5}>
-          <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      {/* Research Section */}
+      <section className="py-16 md:py-24">
+        <div className="max-w-5xl mx-auto px-6">
+          <FadeIn delay={0} duration={0.5}>
+            <div className="flex items-center justify-between mb-12">
+              <h2 className="text-2xl font-semibold text-gray-900">Research</h2>
+              <Link href="/atlas" className="text-sm text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1">
+                View all research <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+            {RESEARCH_ARTICLES.map((article, index) => (
+              <FadeIn key={article.id} delay={0.1 * index} duration={0.5}>
+                <Link href={article.href} className="block group">
+                  <article className="border-t border-gray-200 pt-6 hover:border-gray-400 transition-colors">
+                    <div className="text-sm text-gray-400 mb-3 font-medium">{article.date}</div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-emerald-600 transition-colors">
+                      {article.title}
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed text-[15px]">
+                      {article.description}
+                    </p>
+                  </article>
+                </Link>
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-20 md:py-28 bg-gray-900 text-white">
+        <div className="max-w-5xl mx-auto px-6">
+          <FadeIn delay={0} duration={0.6}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               <div>
-                <div className="text-2xl font-bold text-gray-900">1M+</div>
-                <div className="text-sm text-gray-500">Hands analyzed</div>
+                <div className="text-4xl md:text-5xl font-light mb-2">
+                  <CountUp end={7} duration={1500} suffix="+" />
+                </div>
+                <div className="text-sm text-gray-400">Decision Tools</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-gray-900">22</div>
-                <div className="text-sm text-gray-500">Training scenarios</div>
+                <div className="text-4xl md:text-5xl font-light mb-2">
+                  <CountUp end={1} duration={2000} suffix="M" />
+                </div>
+                <div className="text-sm text-gray-400">Hands Analyzed</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-gray-900">7+</div>
-                <div className="text-sm text-gray-500">Decision tools</div>
+                <div className="text-4xl md:text-5xl font-light mb-2">
+                  <CountUp end={22} duration={1800} suffix="+" />
+                </div>
+                <div className="text-sm text-gray-400">Training Scenarios</div>
               </div>
               <div>
-                <div className="text-2xl font-bold text-gray-900">90+</div>
-                <div className="text-sm text-gray-500">Years of theory</div>
+                <div className="text-4xl md:text-5xl font-light mb-2">
+                  <CountUp end={90} duration={2200} suffix="+" />
+                </div>
+                <div className="text-sm text-gray-400">Years of Theory</div>
               </div>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Footer CTA */}
+      <section className="py-20 md:py-28">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <FadeIn delay={0} duration={0.6}>
+            <h2 className="text-3xl md:text-4xl font-serif font-normal text-gray-900 mb-6">
+              Ready to improve your game?
+            </h2>
+            <p className="text-lg text-gray-600 mb-10">
+              Start with Analyze a Spot to see instant GTO recommendations, then progress to training and deeper study.
+            </p>
+            <Button
+              onClick={() => navigate("/tools/spot-analyzer")}
+              className="bg-gray-900 hover:bg-gray-800 text-white px-10 py-6 text-base rounded-full transition-all hover:scale-[1.02]"
+            >
+              Get Started
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-16 border-t border-gray-100">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-4">Tools</h4>
+              <ul className="space-y-3 text-gray-500">
+                <li><Link href="/tools/spot-analyzer" className="hover:text-gray-900 transition-colors">Analyze a Spot</Link></li>
+                <li><Link href="/tools/quiz" className="hover:text-gray-900 transition-colors">Trainer</Link></li>
+                <li><Link href="/tools/strategy-library" className="hover:text-gray-900 transition-colors">Ranges</Link></li>
+                <li><Link href="/tools/hand-simulator" className="hover:text-gray-900 transition-colors">Hand Simulator</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-4">Research</h4>
+              <ul className="space-y-3 text-gray-500">
+                <li><Link href="/atlas" className="hover:text-gray-900 transition-colors">Atlas</Link></li>
+                <li><Link href="/atlas/mathematical-foundations" className="hover:text-gray-900 transition-colors">Math Foundations</Link></li>
+                <li><Link href="/atlas/game-theory-evolution" className="hover:text-gray-900 transition-colors">Game Theory</Link></li>
+                <li><Link href="/atlas/ai-algorithm-analysis" className="hover:text-gray-900 transition-colors">AI & Algorithms</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-4">Resources</h4>
+              <ul className="space-y-3 text-gray-500">
+                <li><Link href="/research" className="hover:text-gray-900 transition-colors">Case Studies</Link></li>
+                <li><Link href="/research-map" className="hover:text-gray-900 transition-colors">About</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-4">SICE</h4>
+              <p className="text-gray-500 leading-relaxed">
+                Strategic Intelligence Content Engine for poker decision-making.
+              </p>
             </div>
           </div>
-        </FadeIn>
-
-        {/* Research Section - Third Screen */}
-        <FadeIn delay={0.7} duration={0.5}>
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Research & Theory</h2>
-              <Link href="/atlas" className="text-sm text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
-                View all <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Link href="/atlas/mathematical-foundations" className="block">
-                <div className="bg-white rounded-xl border border-gray-200 p-5 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer group">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <BarChart3 className="h-5 w-5 text-amber-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900 group-hover:text-emerald-600 transition-colors">
-                        Mathematical Foundations
-                      </h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Probability theory, martingales, and stochastic calculus
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-              <Link href="/atlas/game-theory-evolution" className="block">
-                <div className="bg-white rounded-xl border border-gray-200 p-5 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer group">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <TrendingUp className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900 group-hover:text-emerald-600 transition-colors">
-                        Game Theory & GTO
-                      </h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Nash equilibrium and exploitative strategies
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            </div>
+          <div className="mt-16 pt-8 border-t border-gray-100 text-center text-sm text-gray-400">
+            © 2024 SICE. Built with research from 90+ years of game theory.
           </div>
-        </FadeIn>
-
-        {/* Footer */}
-        <footer className="text-center py-8 border-t border-gray-200">
-          <p className="text-sm text-gray-500">
-            SICE — Strategic Intelligence Content Engine
-          </p>
-        </footer>
-      </main>
+        </div>
+      </footer>
     </div>
   );
 }
