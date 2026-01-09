@@ -1,16 +1,16 @@
 /**
  * Persistent Sidebar Navigation (P0-2)
  * Enables one-click section switching without back buttons
- * Responsive: collapses to hamburger on mobile
+ * Responsive: collapses to hamburger on mobile with smooth animations
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
 import {
   Menu, X, Target, Brain, Lightbulb, Wrench, History, Bookmark,
-  BookOpen, Zap, Gamepad2
+  BookOpen, Zap, Gamepad2, ChevronRight
 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 const NAV_ITEMS = [
   {
@@ -103,12 +103,35 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Close on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && mobileOpen) {
+        setMobileOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [mobileOpen]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
   // Close mobile menu when navigating
-  const handleNavigation = (href: string) => {
+  const handleNavigation = useCallback((href: string) => {
     navigate(href);
     setMobileOpen(false);
     onClose?.();
-  };
+  }, [navigate, onClose]);
 
   // Determine if item is active
   const isActive = (href: string) => {
@@ -120,44 +143,76 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const personalItems = NAV_ITEMS.filter(item => item.category === "personal");
   const researchItems = NAV_ITEMS.filter(item => item.category === "research");
 
-  // Mobile: show hamburger button
+  // Mobile: show hamburger button and slide-in panel
   if (isMobile) {
     return (
       <>
-        {/* Mobile Hamburger Button */}
-        <button
+        {/* Mobile Hamburger Button - Fixed at top left */}
+        <motion.button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="fixed top-4 left-4 z-40 p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 md:hidden"
+          className="fixed top-4 left-4 z-50 p-2.5 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+          whileTap={{ scale: 0.95 }}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
-          {mobileOpen ? (
-            <X className="h-5 w-5 text-gray-700" />
-          ) : (
-            <Menu className="h-5 w-5 text-gray-700" />
+          <AnimatePresence mode="wait">
+            {mobileOpen ? (
+              <motion.div
+                key="close"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <X className="h-5 w-5 text-gray-700" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="menu"
+                initial={{ rotate: 90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: -90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <Menu className="h-5 w-5 text-gray-700" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.button>
+
+        {/* Mobile Sidebar Overlay & Panel */}
+        <AnimatePresence>
+          {mobileOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+                onClick={() => setMobileOpen(false)}
+              />
+
+              {/* Sidebar Panel */}
+              <motion.div
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="fixed left-0 top-0 h-full w-72 bg-white shadow-2xl z-50 overflow-hidden"
+              >
+                <SidebarContent
+                  items={toolsItems}
+                  personalItems={personalItems}
+                  researchItems={researchItems}
+                  isActive={isActive}
+                  onNavigate={handleNavigation}
+                  isMobile={true}
+                />
+              </motion.div>
+            </>
           )}
-        </button>
-
-        {/* Mobile Sidebar Overlay */}
-        {mobileOpen && (
-          <div
-            className="fixed inset-0 bg-black/20 z-30 md:hidden"
-            onClick={() => setMobileOpen(false)}
-          />
-        )}
-
-        {/* Mobile Sidebar Panel */}
-        <div
-          className={`fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 z-40 transform transition-transform duration-200 md:hidden ${
-            mobileOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-        >
-          <SidebarContent
-            items={toolsItems}
-            personalItems={personalItems}
-            researchItems={researchItems}
-            isActive={isActive}
-            onNavigate={handleNavigation}
-          />
-        </div>
+        </AnimatePresence>
       </>
     );
   }
@@ -171,6 +226,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         researchItems={researchItems}
         isActive={isActive}
         onNavigate={handleNavigation}
+        isMobile={false}
       />
     </aside>
   );
@@ -182,6 +238,7 @@ interface SidebarContentProps {
   researchItems: typeof NAV_ITEMS;
   isActive: (href: string) => boolean;
   onNavigate: (href: string) => void;
+  isMobile: boolean;
 }
 
 function SidebarContent({
@@ -189,12 +246,13 @@ function SidebarContent({
   personalItems,
   researchItems,
   isActive,
-  onNavigate
+  onNavigate,
+  isMobile
 }: SidebarContentProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Logo / Branding */}
-      <div className="p-6 border-b border-gray-200">
+      <div className={`p-6 border-b border-gray-100 ${isMobile ? 'pt-16' : ''}`}>
         <h2 className="text-xl font-bold text-gray-900">SICE</h2>
         <p className="text-xs text-gray-500 mt-1">Poker Decision Engine</p>
       </div>
@@ -202,92 +260,87 @@ function SidebarContent({
       {/* Navigation Sections */}
       <nav className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* Tools Section */}
-        <div>
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
-            Tools
-          </h3>
-          <div className="space-y-2">
-            {items.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => onNavigate(item.href)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
-                    active
-                      ? "bg-emerald-100 text-emerald-700 font-medium"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-sm">{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <NavSection
+          title="Tools"
+          items={items}
+          isActive={isActive}
+          onNavigate={onNavigate}
+          isMobile={isMobile}
+        />
 
         {/* Personal Section */}
-        <div>
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
-            Personal
-          </h3>
-          <div className="space-y-2">
-            {personalItems.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => onNavigate(item.href)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
-                    active
-                      ? "bg-emerald-100 text-emerald-700 font-medium"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-sm">{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <NavSection
+          title="Personal"
+          items={personalItems}
+          isActive={isActive}
+          onNavigate={onNavigate}
+          isMobile={isMobile}
+        />
 
         {/* Research Section */}
-        <div>
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2">
-            Research
-          </h3>
-          <div className="space-y-2">
-            {researchItems.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => onNavigate(item.href)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
-                    active
-                      ? "bg-emerald-100 text-emerald-700 font-medium"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-sm">{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <NavSection
+          title="Research"
+          items={researchItems}
+          isActive={isActive}
+          onNavigate={onNavigate}
+          isMobile={isMobile}
+        />
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
-        <p className="text-xs text-gray-500 text-center">
+      <div className="p-4 border-t border-gray-100">
+        <p className="text-xs text-gray-400 text-center">
           v1.0 • Poker Decision Engine
         </p>
+      </div>
+    </div>
+  );
+}
+
+interface NavSectionProps {
+  title: string;
+  items: typeof NAV_ITEMS;
+  isActive: (href: string) => boolean;
+  onNavigate: (href: string) => void;
+  isMobile: boolean;
+}
+
+function NavSection({ title, items, isActive, onNavigate, isMobile }: NavSectionProps) {
+  return (
+    <div>
+      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-2">
+        {title}
+      </h3>
+      <div className="space-y-1">
+        {items.map((item, index) => {
+          const Icon = item.icon;
+          const active = isActive(item.href);
+          
+          return (
+            <motion.button
+              key={item.id}
+              onClick={() => onNavigate(item.href)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                active
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              }`}
+              initial={isMobile ? { opacity: 0, x: -20 } : false}
+              animate={isMobile ? { opacity: 1, x: 0 } : undefined}
+              transition={isMobile ? { delay: index * 0.05 } : undefined}
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Icon className={`h-4 w-4 flex-shrink-0 ${active ? 'text-emerald-600' : ''}`} />
+              <span className={`text-sm flex-1 text-left ${active ? 'font-medium' : ''}`}>
+                {item.label}
+              </span>
+              {active && (
+                <ChevronRight className="h-4 w-4 text-emerald-500" />
+              )}
+            </motion.button>
+          );
+        })}
       </div>
     </div>
   );
