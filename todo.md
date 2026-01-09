@@ -600,3 +600,19 @@
 - [x] Add escape key support to close menu
 - [x] Prevent body scroll when menu is open
 - [x] Add staggered item animations on mobile
+
+
+## Read Article Links Fix
+- [ ] Fix Mathematical Foundations link to /atlas/mathematical-foundations
+- [ ] Fix Game Theory & GTO link to /atlas/game-theory-evolution
+- [ ] Fix AI & Algorithms link to /atlas/ai-algorithm-analysis
+- [ ] Fix Decision Framework link to /atlas/decision-matrix
+- [ ] Test all links navigate correctly
+
+
+## Read Article Links Fix (Completed)
+- [x] Verify all Research section article links navigate correctly
+- [x] Test Mathematical Foundations link → /atlas/mathematical-foundations
+- [x] Test Game Theory & GTO link → /atlas/game-theory-evolution
+- [x] Test AI & Algorithms link → /atlas/ai-algorithm-analysis
+- [x] Test Decision Framework link → /atlas/decision-matrix
