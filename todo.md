@@ -616,3 +616,71 @@
 - [x] Test Game Theory & GTO link → /atlas/game-theory-evolution
 - [x] Test AI & Algorithms link → /atlas/ai-algorithm-analysis
 - [x] Test Decision Framework link → /atlas/decision-matrix
+
+
+## Analyze a Spot UX Overhaul (Production-Grade)
+
+### A) Hand Input: Tolerant Parser + Guided Completion
+- [ ] Create parseHand() utility returning { status, normalized, message, suggestions }
+- [ ] Accept "AK" without error - show suited/offsuit assist panel
+- [ ] Accept "AKo", "AKs", "QQ", "77" directly
+- [ ] Normalize "A K", "AKo ", "a k" to proper format
+- [ ] Support "AsKd" explicit suits (infer offsuit)
+- [ ] No red error border for incomplete input - use assist panel instead
+- [ ] Show actionable error only for truly invalid input ("AX", "1K")
+
+### B) Action Line: Structured Action Builder
+- [ ] Add preflop templates: Open, Facing Open, Facing 3bet, Facing 4bet, Squeeze
+- [ ] Show contextual fields based on selection
+- [ ] Always show 1-line scenario summary
+
+### C) Board Input: Forgiving + Street Selector
+- [ ] Create parseBoard() utility
+- [ ] Accept "AK2" (ranks only) and "As Kd 2c" (with suits)
+- [ ] Add street selector: Preflop / Flop / Turn / River
+- [ ] Hide board field for Preflop
+
+### D) Right Panel: State Machine
+- [ ] Empty state: "Enter position, stack, action, and your hand" + Try Example button
+- [ ] Ready state: "Ready to analyze" + Analyze CTA
+- [ ] Loading state: Skeleton UI + spinner (no layout shift)
+- [ ] Result state: Action + Confidence + Why bullets + Key metric
+- [ ] Error state: Friendly message + retry + "Report issue"
+
+### E) Micro-interactions
+- [ ] Button hover/press feedback with focus rings
+- [ ] Success animation when resolving suitedness
+- [ ] Smooth expand/collapse for contextual fields
+- [ ] Respect prefers-reduced-motion
+
+### F) Copywriting
+- [ ] Replace error messages with beginner-friendly guidance
+- [ ] "AK can be suited or offsuit. Which one is it?"
+- [ ] Provide examples inline
+
+### Engineering
+- [ ] Create normalizeInput() utility
+- [ ] Create HandInput component with assist panel
+- [ ] Create BoardInput component with street selector
+- [ ] Create AnalysisPanel component with state machine
+- [ ] No CLS: fixed min-heights, skeleton matches layout
+- [ ] Mobile-first: tap targets >= 44px
+- [ ] Add unit tests for parseHand/parseBoard
+
+
+## Analyze a Spot UX Overhaul (Completed)
+- [x] Create parseHand utility with tolerant parsing (handles AK → AKs/AKo suggestions)
+- [x] Create parseBoard utility with street detection (preflop/flop/turn/river)
+- [x] Build HandInput component with suited/offsuit assist panel
+- [x] Build BoardInput component with street selector
+- [x] Build AnalysisPanel with state machine (Empty/Ready/Loading/Result/Error)
+- [x] Refactor SpotAnalyzer page with new components
+- [x] Add micro-interactions and reduced-motion support
+- [x] Write comprehensive unit tests (30 tests - all passing)
+- [x] Verify all acceptance criteria met:
+  - No red error for incomplete input (shows guided suggestions instead)
+  - Clear guidance for ambiguous hands (AK → AKs/AKo buttons)
+  - Scenario summary shows when ready (Hand • Position • Stack • Action)
+  - No layout shift when state changes (fixed heights)
+  - Keyboard accessible navigation
+  - Respects prefers-reduced-motion
